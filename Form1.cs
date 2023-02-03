@@ -31,7 +31,7 @@ namespace SnmpLog
         }
         SnmpV1TrapPacket pk2 = new SnmpV1TrapPacket();
 
-        int i = 0;
+        public UInt16 i = 0;
         public Form1()
         {
             InitializeComponent();
