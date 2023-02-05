@@ -18,7 +18,9 @@ using System.Xml.Linq;
 using static SnmpLog.Form1;
 using System.Media;
 using SnmpLog.Properties;
-
+using static System.Net.IPAddress;
+using static System.Windows.Forms.MaskedTextBox;
+using System.Reflection;
 
 namespace SnmpLog
 {
@@ -29,9 +31,24 @@ namespace SnmpLog
             public SnmpV1TrapPacket snmp_packet;
             public EndPoint snmp_source_ip;
         }
+
+        public class MySwitchs
+        {
+            public IPAddress IPAddress { get; set; }
+            public string Name { get; set; }
+
+            public MySwitchs(string Name, IPAddress IPAddress)
+            {   
+                this.Name = Name;
+                this.IPAddress = IPAddress;
+            }
+        }
         SnmpV1TrapPacket pk2 = new SnmpV1TrapPacket();
 
+
+        public List<MySwitchs> activeSwitchs = new List<MySwitchs>(10);
         public UInt16 i = 0;
+        bool moveobj = false;
         public Form1()
         {
             InitializeComponent();
@@ -40,10 +57,12 @@ namespace SnmpLog
             openFileDialog1.FileName = "";
             saveFileDialog1.Filter = "Text files(*.txt)|*.txt|All files(*.*)|*.*";
             groupBoxConfigure.Visible = false;
-
+            
         }
         private async void button1_Click(object sender, EventArgs e)
         {
+            richTextBox1.AppendText(activeSwitchs.Count.ToString());
+            richTextBox1.AppendText(activeSwitchs[0].Name);
             var progress_recievedata = new Progress<_updsctruct>(s => Upd_Form(s));
             await Task.Run(() => snmpserver.TrapReseive(progress_recievedata));
 
@@ -51,14 +70,9 @@ namespace SnmpLog
         }
         void Upd_Form(_updsctruct a)
         {
-            if (a.snmp_packet.Pdu.AgentAddress.ToString() == "10.22.8.11")
-            {
-                SoundPlayer player = new SoundPlayer();
-
-                player.Stream = Properties.Resources.audio_editor_output;
-                player.Play();
-                label1.Image = global::SnmpLog.Properties.Resources.руль;
-            }
+            SoundPlayer player = new SoundPlayer();
+            player.Stream = Properties.Resources.audio_editor_output;
+            
             var builder01 = new StringBuilder();
             builder01.Append(System.DateTime.Now + ": " + a.snmp_packet.Pdu.Generic + a.snmp_packet.Pdu.AgentAddress.ToString() + "\r\n");
             richTextBox1.AppendText(builder01.ToString());
@@ -76,46 +90,92 @@ namespace SnmpLog
             }
             Console.WriteLine("** End of SNMP Version 1 TRAP data.");
 
+            foreach (MySwitchs d in activeSwitchs)
+            {
+                if (d.IPAddress.ToString() == a.snmp_packet.Pdu.AgentAddress.ToString())
+                {
+                    PictureBox actpctbx = Controls[(d.Name)] as PictureBox;
+                    actpctbx.Image = global::SnmpLog.Properties.Resources.sw_ok;
+                    player.Play();
+                    if (actpctbx.Created == true)
+                    {
+                        this.TopMost = true;
+                        this.TopMost = false;
+                    }
+                }
+                   
+            }
+
 
         }
 
-        private void toolStripTextBox2_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void выходToolStripMenuItem_Click(object sender, EventArgs e)
+        private void exitToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Close();
         }
 
-        private void конфигурацияToolStripMenuItem_Click(object sender, EventArgs e)
+        private void configureToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (конфигурацияToolStripMenuItem.CheckState == CheckState.Checked)
+            if (configureToolStripMenuItem.CheckState == CheckState.Checked)
             {
-                конфигурацияToolStripMenuItem.CheckState = CheckState.Unchecked;
-                открытьФайлКонфигурацииToolStripMenuItem.Enabled = false;
+                configureToolStripMenuItem.CheckState = CheckState.Unchecked;
+                opnfileconfToolStripMenuItem.Enabled = false;
                 groupBoxConfigure.Visible = false;
             }
             else
             {
-                конфигурацияToolStripMenuItem.CheckState = CheckState.Checked;
-                открытьФайлКонфигурацииToolStripMenuItem.Enabled = true;
+                configureToolStripMenuItem.CheckState = CheckState.Checked;
+                opnfileconfToolStripMenuItem.Enabled = true;
                 groupBoxConfigure.Visible = true;
             }
         }
 
-        private void Form1_Load(object sender, EventArgs e)
+        private void AddSwitch()
         {
+            
+            if(string.IsNullOrEmpty(textBoxName.Text) == true && string.IsNullOrEmpty(textBoxIP.Text) == true)
+            {
+                MessageBox.Show("Заполнены не все поля");
+                return;
+            }
 
+
+            try
+            {
+                activeSwitchs.Add(new MySwitchs(textBoxName.Text, Parse(textBoxIP.Text)));
+            }
+            catch (FormatException)
+            {
+                MessageBox.Show("Неверный IP");
+                return;
+            }
+
+            Random rnd = new Random();
+            PictureBox pctbx = new PictureBox()
+            {
+                Image = global::SnmpLog.Properties.Resources.sw_clear,
+                SizeMode = PictureBoxSizeMode.CenterImage,
+                Width = 110,
+                Height = 70,
+                Location = new System.Drawing.Point(rnd.Next(50, 200), rnd.Next(50, 200)),
+                Name = textBoxName.Text,
+
+
+            };
+            Controls.Add(pctbx);
+            pctbx.MouseDown += Pctbx_MouseDown;
+            pctbx.MouseMove += Pctbx_MouseMove;
+            pctbx.MouseUp += Pctbx_MouseUp;
+            pctbx.Paint += Pctbx_Paint;
+
+            comboBoxSwitchs.Items.Add(textBoxName.Text);
+
+            i++;
         }
 
-        private void notifyIcon1_MouseDoubleClick(object sender, MouseEventArgs e)
-        {
 
-        }
 
-        private void открытьФайлКонфигурацииToolStripMenuItem_Click(object sender, EventArgs e)
+        private void opnfileconfToolStripMenuItem_Click(object sender, EventArgs e)
         {
             
             openFileDialog1.ShowDialog();
@@ -124,21 +184,63 @@ namespace SnmpLog
 
         private void button2_Click(object sender, EventArgs e)
         {
-            this.Controls.Add(new PictureBox()
+            AddSwitch();
+        }
+
+        private void Pctbx_Paint(object sender, PaintEventArgs e)
+        {
+            Pen myPen = new Pen(Color.Gray, 1);
+            myPen.DashStyle = System.Drawing.Drawing2D.DashStyle.Dash;
+            e.Graphics.DrawRectangle(myPen, 0, 0, 109, 69);
+            Font font = new Font("Arial", 13, FontStyle.Bold);
+            StringFormat stringFormat= new StringFormat();
+            stringFormat.Alignment = StringAlignment.Center;
+            e.Graphics.DrawString(activeSwitchs[0].Name, font,Brushes.DarkGray, 55,47, stringFormat); //++ sender.GetType().GetProperty("Name").GetValue(sender, null) as string
+        }
+
+        private void Pctbx_MouseUp(object sender, MouseEventArgs e)
+        {
+            moveobj = false;
+        }
+
+        private void Pctbx_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (moveobj && configureToolStripMenuItem.CheckState == CheckState.Checked &&
+                Cursor.Position.X > ActiveForm.Location.X && 
+                Cursor.Position.X < ActiveForm.Location.X + ActiveForm.Size.Width &&
+                Cursor.Position.Y > ActiveForm.Location.Y + 100 &&
+                Cursor.Position.Y < ActiveForm.Location.Y + ActiveForm.Size.Height-60)
+            sender.GetType().GetProperty("Location").SetValue(sender, new Point(Cursor.Position.X-DesktopLocation.X-50, Cursor.Position.Y-DesktopLocation.Y-50));
+        }
+
+        private void Pctbx_MouseDown(object sender, MouseEventArgs e)
+        {
+            moveobj = true;
+        }
+
+        
+        private void switch_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show("Ok" + sender);
+        }
+
+        private void buttonDeleteSw_Click(object sender, EventArgs e)
+        {
+            if (comboBoxSwitchs.Text == "") return;
+            PictureBox actpctbx = Controls[(comboBoxSwitchs.Text)] as PictureBox;
+            actpctbx.Dispose();
+            foreach (MySwitchs CurrSwitch in activeSwitchs)
             {
-                
-                Image = global::SnmpLog.Properties.Resources.руль,
-                Location = new System.Drawing.Point(200, 200),
-                Name = "picbx_DinamicAdded" + i.ToString(),
-                Size = new System.Drawing.Size(120, 120),
-                TabIndex = 9,
-                TabStop = false
-            });
-            i++;
-
+                if (CurrSwitch.Name == comboBoxSwitchs.Text)
+                {
+                    activeSwitchs.RemoveAt(activeSwitchs.IndexOf(CurrSwitch));
+                    comboBoxSwitchs.Items.Remove(comboBoxSwitchs.SelectedItem);
+                    comboBoxSwitchs.Text = "";
+                    break;
+                }
+            }
         }
-
-        }
+    }
     }
 
 
