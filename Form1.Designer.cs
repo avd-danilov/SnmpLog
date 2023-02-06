@@ -42,7 +42,7 @@ namespace SnmpLog
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
             this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
             this.groupBoxConfigure = new System.Windows.Forms.GroupBox();
-            this.buttonDeleteSw = new System.Windows.Forms.Button();
+            this.ButtonDeleteSw = new System.Windows.Forms.Button();
             this.comboBoxSwitchs = new System.Windows.Forms.ComboBox();
             this.textBoxIP = new System.Windows.Forms.TextBox();
             this.comboBox1 = new System.Windows.Forms.ComboBox();
@@ -50,7 +50,10 @@ namespace SnmpLog
             this.label4 = new System.Windows.Forms.Label();
             this.labelIP = new System.Windows.Forms.Label();
             this.labelName = new System.Windows.Forms.Label();
-            this.button2 = new System.Windows.Forms.Button();
+            this.ButtonAddSw = new System.Windows.Forms.Button();
+            this.listView1 = new System.Windows.Forms.ListView();
+            this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.menuStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             this.groupBoxConfigure.SuspendLayout();
@@ -58,7 +61,7 @@ namespace SnmpLog
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(515, 374);
+            this.button1.Location = new System.Drawing.Point(735, 559);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(150, 36);
             this.button1.TabIndex = 0;
@@ -68,10 +71,10 @@ namespace SnmpLog
             // 
             // richTextBox1
             // 
-            this.richTextBox1.Location = new System.Drawing.Point(12, 277);
+            this.richTextBox1.Location = new System.Drawing.Point(446, 543);
             this.richTextBox1.Name = "richTextBox1";
             this.richTextBox1.ReadOnly = true;
-            this.richTextBox1.Size = new System.Drawing.Size(486, 133);
+            this.richTextBox1.Size = new System.Drawing.Size(283, 52);
             this.richTextBox1.TabIndex = 4;
             this.richTextBox1.Text = "";
             // 
@@ -82,7 +85,7 @@ namespace SnmpLog
             this.menuToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(1252, 28);
+            this.menuStrip1.Size = new System.Drawing.Size(1397, 28);
             this.menuStrip1.TabIndex = 6;
             this.menuStrip1.Text = "menuProgram";
             // 
@@ -123,9 +126,9 @@ namespace SnmpLog
             this.statusStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripStatusLabel1});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 455);
+            this.statusStrip1.Location = new System.Drawing.Point(0, 707);
             this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Size = new System.Drawing.Size(1252, 26);
+            this.statusStrip1.Size = new System.Drawing.Size(1397, 26);
             this.statusStrip1.TabIndex = 7;
             this.statusStrip1.Text = "statusStrip1";
             // 
@@ -141,7 +144,7 @@ namespace SnmpLog
             // 
             // groupBoxConfigure
             // 
-            this.groupBoxConfigure.Controls.Add(this.buttonDeleteSw);
+            this.groupBoxConfigure.Controls.Add(this.ButtonDeleteSw);
             this.groupBoxConfigure.Controls.Add(this.comboBoxSwitchs);
             this.groupBoxConfigure.Controls.Add(this.textBoxIP);
             this.groupBoxConfigure.Controls.Add(this.comboBox1);
@@ -149,22 +152,22 @@ namespace SnmpLog
             this.groupBoxConfigure.Controls.Add(this.label4);
             this.groupBoxConfigure.Controls.Add(this.labelIP);
             this.groupBoxConfigure.Controls.Add(this.labelName);
-            this.groupBoxConfigure.Controls.Add(this.button2);
-            this.groupBoxConfigure.Location = new System.Drawing.Point(841, 58);
+            this.groupBoxConfigure.Controls.Add(this.ButtonAddSw);
+            this.groupBoxConfigure.Location = new System.Drawing.Point(70, 225);
             this.groupBoxConfigure.Name = "groupBoxConfigure";
             this.groupBoxConfigure.Size = new System.Drawing.Size(370, 370);
             this.groupBoxConfigure.TabIndex = 8;
             this.groupBoxConfigure.TabStop = false;
             // 
-            // buttonDeleteSw
+            // ButtonDeleteSw
             // 
-            this.buttonDeleteSw.Location = new System.Drawing.Point(153, 323);
-            this.buttonDeleteSw.Name = "buttonDeleteSw";
-            this.buttonDeleteSw.Size = new System.Drawing.Size(149, 23);
-            this.buttonDeleteSw.TabIndex = 15;
-            this.buttonDeleteSw.Text = "Удалить устройство";
-            this.buttonDeleteSw.UseVisualStyleBackColor = true;
-            this.buttonDeleteSw.Click += new System.EventHandler(this.buttonDeleteSw_Click);
+            this.ButtonDeleteSw.Location = new System.Drawing.Point(153, 323);
+            this.ButtonDeleteSw.Name = "ButtonDeleteSw";
+            this.ButtonDeleteSw.Size = new System.Drawing.Size(149, 23);
+            this.ButtonDeleteSw.TabIndex = 15;
+            this.ButtonDeleteSw.Text = "Удалить устройство";
+            this.ButtonDeleteSw.UseVisualStyleBackColor = true;
+            this.ButtonDeleteSw.Click += new System.EventHandler(this.buttonDeleteSw_Click);
             // 
             // comboBoxSwitchs
             // 
@@ -227,21 +230,47 @@ namespace SnmpLog
             this.labelName.TabIndex = 1;
             this.labelName.Text = "Имя устройства";
             // 
-            // button2
+            // ButtonAddSw
             // 
-            this.button2.Location = new System.Drawing.Point(28, 21);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(174, 32);
-            this.button2.TabIndex = 0;
-            this.button2.Text = "Добавить устройство";
-            this.button2.UseVisualStyleBackColor = true;
-            this.button2.Click += new System.EventHandler(this.button2_Click);
+            this.ButtonAddSw.Location = new System.Drawing.Point(28, 21);
+            this.ButtonAddSw.Name = "ButtonAddSw";
+            this.ButtonAddSw.Size = new System.Drawing.Size(174, 32);
+            this.ButtonAddSw.TabIndex = 0;
+            this.ButtonAddSw.Text = "Добавить устройство";
+            this.ButtonAddSw.UseVisualStyleBackColor = true;
+            this.ButtonAddSw.Click += new System.EventHandler(this.ButtonAddSw_Click);
+            // 
+            // listView1
+            // 
+            this.listView1.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.columnHeader1,
+            this.columnHeader2});
+            this.listView1.FullRowSelect = true;
+            this.listView1.GridLines = true;
+            this.listView1.Location = new System.Drawing.Point(909, 50);
+            this.listView1.MultiSelect = false;
+            this.listView1.Name = "listView1";
+            this.listView1.Size = new System.Drawing.Size(488, 654);
+            this.listView1.TabIndex = 10;
+            this.listView1.UseCompatibleStateImageBehavior = false;
+            this.listView1.View = System.Windows.Forms.View.Details;
+            // 
+            // columnHeader1
+            // 
+            this.columnHeader1.Text = "Тип";
+            this.columnHeader1.Width = 77;
+            // 
+            // columnHeader2
+            // 
+            this.columnHeader2.Text = "Данные";
+            this.columnHeader2.Width = 197;
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1252, 481);
+            this.ClientSize = new System.Drawing.Size(1397, 733);
+            this.Controls.Add(this.listView1);
             this.Controls.Add(this.groupBoxConfigure);
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.richTextBox1);
@@ -276,7 +305,7 @@ namespace SnmpLog
         private System.Windows.Forms.OpenFileDialog openFileDialog1;
         private System.Windows.Forms.SaveFileDialog saveFileDialog1;
         private System.Windows.Forms.GroupBox groupBoxConfigure;
-        private System.Windows.Forms.Button button2;
+        private System.Windows.Forms.Button ButtonAddSw;
         private System.Windows.Forms.ComboBox comboBox1;
         private System.Windows.Forms.TextBox textBoxName;
         private System.Windows.Forms.Label label4;
@@ -284,7 +313,10 @@ namespace SnmpLog
         private System.Windows.Forms.Label labelName;
         private TextBox textBoxIP;
         private ComboBox comboBoxSwitchs;
-        private Button buttonDeleteSw;
+        private Button ButtonDeleteSw;
+        private ListView listView1;
+        private ColumnHeader columnHeader1;
+        private ColumnHeader columnHeader2;
     }
 }
 

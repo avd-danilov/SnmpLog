@@ -21,12 +21,16 @@ using SnmpLog.Properties;
 using static System.Net.IPAddress;
 using static System.Windows.Forms.MaskedTextBox;
 using System.Reflection;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+using SnmpLog;
+using TextBox = System.Windows.Forms.TextBox;
+using ListView = System.Windows.Forms.ListView;
 
 namespace SnmpLog
 {
     public partial class Form1 : Form
     {
-        public struct _updsctruct
+        public struct UpdSwStruct
         {
             public SnmpV1TrapPacket snmp_packet;
             public EndPoint snmp_source_ip;
@@ -43,12 +47,11 @@ namespace SnmpLog
                 this.IPAddress = IPAddress;
             }
         }
-        SnmpV1TrapPacket pk2 = new SnmpV1TrapPacket();
-
-
+        
         public List<MySwitchs> activeSwitchs = new List<MySwitchs>(10);
         public UInt16 i = 0;
         bool moveobj = false;
+
         public Form1()
         {
             InitializeComponent();
@@ -58,25 +61,26 @@ namespace SnmpLog
             saveFileDialog1.Filter = "Text files(*.txt)|*.txt|All files(*.*)|*.*";
             groupBoxConfigure.Visible = false;
             
+            
         }
+       
+
         private async void button1_Click(object sender, EventArgs e)
         {
             richTextBox1.AppendText(activeSwitchs.Count.ToString());
             richTextBox1.AppendText(activeSwitchs[0].Name);
-            var progress_recievedata = new Progress<_updsctruct>(s => Upd_Form(s));
-            await Task.Run(() => snmpserver.TrapReseive(progress_recievedata));
-
-
+            var progress_recievedata = new Progress<UpdSwStruct>(s => Upd_Form(s));
+            await Task.Run(() => SnmpFunction.TrapReseive(progress_recievedata));
         }
-        void Upd_Form(_updsctruct a)
+        
+
+        void Upd_Form(UpdSwStruct a)
         {
             SoundPlayer player = new SoundPlayer();
-            player.Stream = Properties.Resources.audio_editor_output;
-            
+            player.Stream = Properties.Resources.audio_editor_output;           
             var builder01 = new StringBuilder();
             builder01.Append(System.DateTime.Now + ": " + a.snmp_packet.Pdu.Generic + a.snmp_packet.Pdu.AgentAddress.ToString() + "\r\n");
             richTextBox1.AppendText(builder01.ToString());
-
             Console.WriteLine("** SNMP Version 1 TRAP received from {0}:", a.snmp_source_ip.ToString());
             Console.WriteLine("*** Trap generic: {0}", a.snmp_packet.Pdu.Generic);
             Console.WriteLine("*** Trap specific: {0} {1}", a.snmp_packet.Pdu.Specific, a.snmp_packet.Pdu.Enterprise);
@@ -89,7 +93,6 @@ namespace SnmpLog
                 Console.WriteLine("**** {0} {1}: {2}", v.Oid.ToString(), SnmpConstants.GetTypeName(v.Value.Type), v.Value.ToString());
             }
             Console.WriteLine("** End of SNMP Version 1 TRAP data.");
-
             foreach (MySwitchs d in activeSwitchs)
             {
                 if (d.IPAddress.ToString() == a.snmp_packet.Pdu.AgentAddress.ToString())
@@ -102,17 +105,14 @@ namespace SnmpLog
                         this.TopMost = true;
                         this.TopMost = false;
                     }
-                }
-                   
+                }                  
             }
-
-
         }
-
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Close();
         }
+
 
         private void configureToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -129,6 +129,7 @@ namespace SnmpLog
                 groupBoxConfigure.Visible = true;
             }
         }
+
 
         private void AddSwitch()
         {
@@ -174,7 +175,6 @@ namespace SnmpLog
         }
 
 
-
         private void opnfileconfToolStripMenuItem_Click(object sender, EventArgs e)
         {
             
@@ -182,10 +182,12 @@ namespace SnmpLog
 
         }
 
-        private void button2_Click(object sender, EventArgs e)
+
+        private void ButtonAddSw_Click(object sender, EventArgs e)
         {
             AddSwitch();
         }
+
 
         private void Pctbx_Paint(object sender, PaintEventArgs e)
         {
@@ -195,13 +197,15 @@ namespace SnmpLog
             Font font = new Font("Arial", 13, FontStyle.Bold);
             StringFormat stringFormat= new StringFormat();
             stringFormat.Alignment = StringAlignment.Center;
-            e.Graphics.DrawString(activeSwitchs[0].Name, font,Brushes.DarkGray, 55,47, stringFormat); //++ sender.GetType().GetProperty("Name").GetValue(sender, null) as string
+            e.Graphics.DrawString(activeSwitchs[activeSwitchs.Count-1].Name, font,Brushes.DarkGray, 55,47, stringFormat); //++ sender.GetType().GetProperty("Name").GetValue(sender, null) as string
         }
+
 
         private void Pctbx_MouseUp(object sender, MouseEventArgs e)
         {
             moveobj = false;
         }
+
 
         private void Pctbx_MouseMove(object sender, MouseEventArgs e)
         {
@@ -213,9 +217,27 @@ namespace SnmpLog
             sender.GetType().GetProperty("Location").SetValue(sender, new Point(Cursor.Position.X-DesktopLocation.X-50, Cursor.Position.Y-DesktopLocation.Y-50));
         }
 
+
         private void Pctbx_MouseDown(object sender, MouseEventArgs e)
         {
             moveobj = true;
+            if (configureToolStripMenuItem.CheckState == CheckState.Unchecked)
+            {
+
+                PictureBox actpctbx = sender as PictureBox;
+                foreach (MySwitchs CurrSwitch in activeSwitchs)
+                {
+                    if (CurrSwitch.Name == actpctbx.Name)
+                    {
+                        listView1.Items.Clear();
+                        SnmpFunction snmpFunction = new SnmpFunction(listView1, richTextBox1);
+                        snmpFunction.GetSnmp(activeSwitchs[activeSwitchs.IndexOf(CurrSwitch)]);
+                        break;
+                    }
+                }
+
+                
+            }
         }
 
         
@@ -223,6 +245,7 @@ namespace SnmpLog
         {
             MessageBox.Show("Ok" + sender);
         }
+
 
         private void buttonDeleteSw_Click(object sender, EventArgs e)
         {
@@ -240,13 +263,28 @@ namespace SnmpLog
                 }
             }
         }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+
+        }
     }
-    }
+}
 
 
-    class snmpserver 
+    class SnmpFunction 
     {
-        public static void TrapReseive(IProgress<_updsctruct> progress1) 
+
+    public static ListView statuslist;
+    public static RichTextBox statusTextBox;
+
+    public SnmpFunction(ListView list, RichTextBox statusTextbox)
+    {
+        statuslist = list;
+        statusTextBox = statusTextbox;
+    }
+
+    public static void TrapReseive(IProgress<UpdSwStruct> progress1) 
         {
             // Construct a socket and bind it to the trap manager port 162
             bool run = true;
@@ -292,7 +330,7 @@ namespace SnmpLog
                     int ver = SnmpPacket.GetProtocolVersion(indata, inlen);
                     if (ver == (int)SnmpVersion.Ver1)
                     {
-                        _updsctruct toForm;
+                        UpdSwStruct toForm;
                         // Parse SNMP Version 1 TRAP packet
                         SnmpV1TrapPacket pkt = new SnmpV1TrapPacket();
                         pkt.decode(indata, inlen);
@@ -331,6 +369,112 @@ namespace SnmpLog
                 }
             }
         }
+
+
+    public  void GetSnmp(MySwitchs selectedSwitch)
+        {
+
+        // SNMP community name
+        OctetString community = new OctetString("public");
+        // Define agent parameters class
+        AgentParameters param = new AgentParameters(community);
+        // Set SNMP version to 1 (or 2)
+        param.Version = SnmpVersion.Ver1;
+        // Construct the agent address object
+        // IpAddress class is easy to use here because
+        //  it will try to resolve constructor parameter if it doesn't
+        //  parse to an IP address
+        IpAddress agent = new IpAddress(selectedSwitch.IPAddress);
+        // Construct target
+        UdpTarget target = new UdpTarget((IPAddress)agent, 161, 2000, 1);
+        // Pdu class used for all requests
+        Pdu pdu = new Pdu(PduType.Get);
+        pdu.VbList.Add("1.3.6.1.2.1.1.1.0"); //sysDescr
+        pdu.VbList.Add("1.3.6.1.2.1.1.2.0"); //sysObjectID
+        pdu.VbList.Add("1.3.6.1.2.1.1.3.0"); //sysUpTime
+        pdu.VbList.Add("1.3.6.1.2.1.1.4.0"); //sysContact
+        pdu.VbList.Add("1.3.6.1.2.1.1.5.0"); //sysName
+                                             // Make SNMP request
+        for (int i = 1; i <= 62; i++)
+        {
+            pdu.VbList.Add("1.3.6.1.2.1.2.2.1.7."+i);
+        }
+        
+        SnmpV1Packet result = (SnmpV1Packet)target.Request(pdu, param);
+        // If result is null then agent didn't reply or we couldn't parse the reply.
+        if (result != null)
+        {
+            // ErrorStatus other then 0 is an error returned by
+            // the Agent - see SnmpConstants for error definitions
+            if (result.Pdu.ErrorStatus != 0)
+            {
+                // agent reported an error with the request
+                
+                Console.WriteLine("Error in SNMP reply. Error {0} index {1}",
+                    result.Pdu.ErrorStatus,
+                    result.Pdu.ErrorIndex);
+            }
+            else
+            {
+                // Reply variables are returned in the same order as they were added
+                //  to the VbList
+                
+                List<ListViewItem> myItems = new List<ListViewItem>();
+                List<ListViewItem.ListViewSubItem> listViewSubItems = new List<ListViewItem.ListViewSubItem>();
+                //ListViewItem.ListViewSubItem listViewSubItem = new ListViewItem.ListViewSubItem();
+                for (int i = 1; i<=62; i++)
+                {
+                    if (result.Pdu.VbList[i + 4].Value.ToString() == "1")
+                    {
+                        myItems.Add(new ListViewItem("Up"));
+                        myItems[myItems.Count - 1].BackColor = Color.LightGreen;
+                    }
+
+                    else
+                        myItems.Add(new ListViewItem("Down"));
+
+                    listViewSubItems.Add(new ListViewItem.ListViewSubItem());
+
+                    listViewSubItems[listViewSubItems.Count-1].Text = result.Pdu.VbList[i + 4].Oid.ToString();
+                    myItems[myItems.Count - 1].SubItems.Add(listViewSubItems[listViewSubItems.Count - 1]);
+                    
+                    //statuslist.Items.Add(myItems[myItems.Count - 1]);
+
+                }
+                statuslist.Items.AddRange(myItems.ToArray());
+
+                
+
+                
+                Console.WriteLine("sysDescr({0}) ({1}): {2}",
+                    result.Pdu.VbList[0].Oid.ToString(),
+                    SnmpConstants.GetTypeName(result.Pdu.VbList[0].Value.Type),
+                    result.Pdu.VbList[0].Value.ToString());
+                Console.WriteLine("sysObjectID({0}) ({1}): {2}",
+                    result.Pdu.VbList[1].Oid.ToString(),
+                    SnmpConstants.GetTypeName(result.Pdu.VbList[1].Value.Type),
+                    result.Pdu.VbList[1].Value.ToString());
+                Console.WriteLine("sysUpTime({0}) ({1}): {2}",
+                    result.Pdu.VbList[2].Oid.ToString(),
+                    SnmpConstants.GetTypeName(result.Pdu.VbList[2].Value.Type),
+                    result.Pdu.VbList[2].Value.ToString());
+                Console.WriteLine("sysContact({0}) ({1}): {2}",
+                    result.Pdu.VbList[3].Oid.ToString(),
+                    SnmpConstants.GetTypeName(result.Pdu.VbList[3].Value.Type),
+                    result.Pdu.VbList[3].Value.ToString());
+                Console.WriteLine("sysName({0}) ({1}): {2}",
+                    result.Pdu.VbList[4].Oid.ToString(),
+                    SnmpConstants.GetTypeName(result.Pdu.VbList[4].Value.Type),
+                    result.Pdu.VbList[4].Value.ToString());
+            }
+        }
+        else
+        {
+            Console.WriteLine("No response received from SNMP agent.");
+        }
+        target.Close();
+
+    }
     }
    
 
