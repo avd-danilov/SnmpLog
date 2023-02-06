@@ -130,13 +130,4 @@
   <data name="sw_ok" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\sw_ok.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="zvuk_kozla_kozyi_30730" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\zvuk-kozla-kozyi-30730.wav;System.IO.MemoryStream, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="Новый_проект" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Новый проект.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="руль" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\руль.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
 </root>
