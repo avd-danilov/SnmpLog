@@ -53,17 +53,19 @@ namespace SnmpLog
             this.listView1 = new System.Windows.Forms.ListView();
             this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.pictureBoxWire = new System.Windows.Forms.PictureBox();
             this.menuStrip1.SuspendLayout();
             this.statusStrip.SuspendLayout();
             this.groupBoxConfigure.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxWire)).BeginInit();
             this.SuspendLayout();
             // 
             // richTextBox1
             // 
-            this.richTextBox1.Location = new System.Drawing.Point(446, 543);
+            this.richTextBox1.Location = new System.Drawing.Point(12, 398);
             this.richTextBox1.Name = "richTextBox1";
             this.richTextBox1.ReadOnly = true;
-            this.richTextBox1.Size = new System.Drawing.Size(283, 52);
+            this.richTextBox1.Size = new System.Drawing.Size(860, 300);
             this.richTextBox1.TabIndex = 4;
             this.richTextBox1.Text = "";
             // 
@@ -115,7 +117,7 @@ namespace SnmpLog
             this.statusStrip.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.statusStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripStatusLabel});
-            this.statusStrip.Location = new System.Drawing.Point(0, 707);
+            this.statusStrip.Location = new System.Drawing.Point(0, 706);
             this.statusStrip.Name = "statusStrip";
             this.statusStrip.Size = new System.Drawing.Size(1397, 26);
             this.statusStrip.TabIndex = 7;
@@ -142,9 +144,9 @@ namespace SnmpLog
             this.groupBoxConfigure.Controls.Add(this.labelIP);
             this.groupBoxConfigure.Controls.Add(this.labelName);
             this.groupBoxConfigure.Controls.Add(this.ButtonAddSw);
-            this.groupBoxConfigure.Location = new System.Drawing.Point(70, 225);
+            this.groupBoxConfigure.Location = new System.Drawing.Point(895, 47);
             this.groupBoxConfigure.Name = "groupBoxConfigure";
-            this.groupBoxConfigure.Size = new System.Drawing.Size(370, 370);
+            this.groupBoxConfigure.Size = new System.Drawing.Size(490, 625);
             this.groupBoxConfigure.TabIndex = 8;
             this.groupBoxConfigure.TabStop = false;
             // 
@@ -239,10 +241,10 @@ namespace SnmpLog
             this.listView1.FullRowSelect = true;
             this.listView1.GridLines = true;
             this.listView1.HideSelection = false;
-            this.listView1.Location = new System.Drawing.Point(856, 43);
+            this.listView1.Location = new System.Drawing.Point(895, 47);
             this.listView1.MultiSelect = false;
             this.listView1.Name = "listView1";
-            this.listView1.Size = new System.Drawing.Size(488, 654);
+            this.listView1.Size = new System.Drawing.Size(490, 650);
             this.listView1.TabIndex = 10;
             this.listView1.UseCompatibleStateImageBehavior = false;
             this.listView1.View = System.Windows.Forms.View.Details;
@@ -257,28 +259,41 @@ namespace SnmpLog
             this.columnHeader2.Text = "Данные";
             this.columnHeader2.Width = 197;
             // 
+            // pictureBoxWire
+            // 
+            this.pictureBoxWire.BackColor = System.Drawing.SystemColors.ControlLight;
+            this.pictureBoxWire.Location = new System.Drawing.Point(12, 47);
+            this.pictureBoxWire.Name = "pictureBoxWire";
+            this.pictureBoxWire.Size = new System.Drawing.Size(860, 326);
+            this.pictureBoxWire.TabIndex = 11;
+            this.pictureBoxWire.TabStop = false;
+            this.pictureBoxWire.MouseDown += new System.Windows.Forms.MouseEventHandler(this.Form1_MouseDown);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1397, 733);
-            this.Controls.Add(this.listView1);
+            this.ClientSize = new System.Drawing.Size(1397, 732);
             this.Controls.Add(this.groupBoxConfigure);
+            this.Controls.Add(this.listView1);
             this.Controls.Add(this.statusStrip);
             this.Controls.Add(this.richTextBox1);
             this.Controls.Add(this.menuStrip1);
+            this.Controls.Add(this.pictureBoxWire);
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "Form1";
             this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
             this.Text = "SnmpLog";
             this.Load += new System.EventHandler(this.Form1_Load);
             this.MouseDown += new System.Windows.Forms.MouseEventHandler(this.Form1_MouseDown);
+            this.Resize += new System.EventHandler(this.Form1_Resize);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
             this.statusStrip.ResumeLayout(false);
             this.statusStrip.PerformLayout();
             this.groupBoxConfigure.ResumeLayout(false);
             this.groupBoxConfigure.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxWire)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -308,6 +323,7 @@ namespace SnmpLog
         private ListView listView1;
         private ColumnHeader columnHeader1;
         private ColumnHeader columnHeader2;
+        private PictureBox pictureBoxWire;
     }
 }
 

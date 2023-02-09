@@ -72,6 +72,16 @@ namespace SnmpLog.Properties {
         /// <summary>
         ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap kletku {
+            get {
+                object obj = ResourceManager.GetObject("kletku", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap sw_bad {
             get {
                 object obj = ResourceManager.GetObject("sw_bad", resourceCulture);
