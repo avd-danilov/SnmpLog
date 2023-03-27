@@ -28,6 +28,7 @@ using ListView = System.Windows.Forms.ListView;
 using System.Runtime.Remoting.Messaging;
 using System.Security.Cryptography.X509Certificates;
 using System.Drawing.Drawing2D;
+using System.IO;
 
 namespace SnmpLog
 {
@@ -62,8 +63,8 @@ namespace SnmpLog
         public UInt16 i = 0;
         bool moveobj = false;
         public static bool run = true;
-        
-
+        public XDocument xdocSwitch;
+        public XElement switches = new XElement("switches");
         public class DrawLines
         {
             public Pen pen_ok = new Pen(Color.LightGreen)
@@ -117,9 +118,9 @@ namespace SnmpLog
             DrawLines drawWire = new DrawLines();
             Graphics activememo = pictureBoxWire.CreateGraphics();
             activememo.Clear(System.Drawing.SystemColors.ControlLight);
-            drawWire.CreateWire(activeSwitchs[0].Location, activeSwitchs[1].Location, drawWire.pen_ok, activememo);
-            drawWire.CreateWire(activeSwitchs[1].Location, activeSwitchs[2].Location, drawWire.pen_ok, activememo);
-            drawWire.CreateWire(activeSwitchs[0].Location, activeSwitchs[2].Location, drawWire.pen_bad, activememo);
+        //    drawWire.CreateWire(activeSwitchs[0].Location, activeSwitchs[1].Location, drawWire.pen_ok, activememo);
+        //    drawWire.CreateWire(activeSwitchs[1].Location, activeSwitchs[2].Location, drawWire.pen_ok, activememo);
+        //    drawWire.CreateWire(activeSwitchs[0].Location, activeSwitchs[2].Location, drawWire.pen_bad, activememo);
         }
         public void Upd_Form(UpdSwStruct fromSnmp)
         {
@@ -178,6 +179,23 @@ namespace SnmpLog
                 opnfileconfToolStripMenuItem.Enabled = false;
                 groupBoxConfigure.Visible = false;
                 this.pictureBoxWire.Image = null;
+                //Изменим локацию коммутаторов в XML файле
+                foreach (MySwitchs sw in activeSwitchs)
+                {
+                    var swElement = xdocSwitch.Element("switches")?
+                    .Elements("switch")
+                    .FirstOrDefault(s => s.Attribute("name")?.Value == sw.Name);
+                    if (swElement != null)
+                    {
+                        var loc = swElement.Element("Location");
+                        var xloc = loc.Element("X");
+                        var yloc = loc.Element("Y");
+
+                        if (xloc != null) xloc.Value = sw.Location.X.ToString();
+                        if (yloc != null) yloc.Value = sw.Location.Y.ToString();
+                        xdocSwitch.Save("default.xml");
+                    }
+                }
             }
             else
             {
@@ -188,6 +206,51 @@ namespace SnmpLog
             }
         }
 
+        private void LoadSwitch()
+        {
+
+            XElement switches = xdocSwitch.Element("switches");
+            if (switches != null)
+            {
+                // проходим по всем элементам person
+                foreach (XElement currsw in switches.Elements("switch"))
+                {
+                    var name = currsw.Attribute("name");
+                    var ipadd = currsw.Element("ip");
+                    var type = currsw.Element("type");
+                    var loc = currsw.Element("Location");
+                    var xloc = loc.Element("X"); 
+                    var yloc = loc.Element("Y");
+
+                    comboBoxSwitchs.Items.Add(name.Value);
+
+
+                    PictureBox pctbx = new PictureBox()
+                    {
+                        Image = global::SnmpLog.Properties.Resources.sw_clear,
+                        SizeMode = PictureBoxSizeMode.CenterImage,
+                        Width = 110,
+                        Height = 70,
+                        Location = new System.Drawing.Point(Convert.ToInt32(xloc.Value), Convert.ToInt32(yloc.Value)),
+                        Name = name.Value,
+                    };
+
+
+                    Controls.Add(pctbx);
+                    pctbx.BringToFront();
+                    pctbx.MouseDown += Pctbx_MouseDown;
+                    pctbx.MouseMove += Pctbx_MouseMove;
+                    pctbx.MouseUp += Pctbx_MouseUp;
+                    pctbx.Paint += Pctbx_Paint;
+
+                    activeSwitchs.Add(new MySwitchs(name.Value, Parse(ipadd.Value), type.Value, pctbx.Location)); ;
+                    i++;
+                }
+            }
+            
+
+
+        }
         private void AddSwitch()
         {
             foreach (MySwitchs sw in activeSwitchs)
@@ -236,7 +299,35 @@ namespace SnmpLog
             pctbx.Paint += Pctbx_Paint;
 
             comboBoxSwitchs.Items.Add(textBoxName.Text);
+
+            
+            XElement switches = xdocSwitch.Element("switches");
+            XElement swElement = new XElement("switch");
+            XAttribute swNameElement = new XAttribute("name", textBoxName.Text);
+            XElement swIPElement = new XElement("ip", textBoxIP.Text);
+            XElement swTypeElement = new XElement("type", comboBox1.Text);
+            XElement swLocationElement = new XElement("Location");
+            XElement XLocElement = new XElement("X", pctbx.Location.X);
+            XElement YLocElement = new XElement("Y", pctbx.Location.Y);
+
+
+            swElement.Add(swNameElement);
+            swElement.Add(swIPElement);
+            swElement.Add(swTypeElement);
+            swElement.Add(swLocationElement);
+                swLocationElement.Add(XLocElement);
+                swLocationElement.Add(YLocElement);
+
+            switches.Add(swElement);
+            xdocSwitch.Save("default.xml");
+
+
             activeSwitchs.Add(new MySwitchs(textBoxName.Text, Parse(textBoxIP.Text), comboBox1.Text, pctbx.Location));
+
+
+
+
+
 
             i++;
         }
@@ -352,9 +443,25 @@ namespace SnmpLog
         {
             pictureBoxWire.Width = listView1.Location.X - 36;
             pictureBoxWire.Height = richTextBox1.Location.Y - 60;
+            if (File.Exists("default.xml"))
+            {
+                xdocSwitch = XDocument.Load("default.xml");
+                
+            }
+
+            else
+            {
+                MessageBox.Show("Файл настроек не найден");
+                xdocSwitch = new XDocument();
+                
+                xdocSwitch.Add(switches);
+                xdocSwitch.Save("default.xml");
+            }
+            LoadSwitch();
+
             var progress_recievedata = new Progress<UpdSwStruct>(s => Upd_Form(s));
             await Task.Run(() => SnmpFunction.TrapReseive(progress_recievedata));
-            
+
         }
 
         private void Form1_Resize(object sender, EventArgs e)
