@@ -80,6 +80,26 @@ namespace SnmpLog.Properties {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на ** SNMP Version 2 TRAP received from 10.22.8.11:161:
+        ///*** Community: public
+        ///*** VarBind count: 1
+        ///*** VarBind content:
+        ///**** 1.3.6.1.4.1.27514.101.120.1 OctetString: Instance 0, Ethernet1/0/19 changed state to discarding!
+        ///** End of SNMP Version 2 TRAP data.
+        ///** SNMP Version 2 TRAP received from 10.22.8.11:161:
+        ///*** Community: public
+        ///*** VarBind count: 1
+        ///*** VarBind content:
+        ///**** 1.3.6.1.4.1.27514.101.120.1 OctetString: Instance 0, Ethernet1/0/21 changed state to discarding!
+        ///** End of SNMP Version 2 TR [остаток строки не уместился]&quot;;.
+        /// </summary>
+        internal static string log {
+            get {
+                return ResourceManager.GetString("log", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap sw_bad {

@@ -1,0 +1,33 @@
+** SNMP Version 2 TRAP received from 10.22.8.11:161:
+*** Community: public
+*** VarBind count: 1
+*** VarBind content:
+**** 1.3.6.1.4.1.27514.101.120.1 OctetString: Instance 0, Ethernet1/0/19 changed state to discarding!
+** End of SNMP Version 2 TRAP data.
+** SNMP Version 2 TRAP received from 10.22.8.11:161:
+*** Community: public
+*** VarBind count: 1
+*** VarBind content:
+**** 1.3.6.1.4.1.27514.101.120.1 OctetString: Instance 0, Ethernet1/0/21 changed state to discarding!
+** End of SNMP Version 2 TRAP data.
+** SNMP Version 2 TRAP received from 10.22.8.11:161:
+*** Community: public
+*** VarBind count: 1
+*** VarBind content:
+**** 1.3.6.1.4.1.27514.101.120.1 OctetString: Instance 0, Ethernet1/0/21 changed state to learning!
+** End of SNMP Version 2 TRAP data.
+** SNMP Version 2 TRAP received from 10.22.8.11:161:
+*** Community: public
+*** VarBind count: 1
+*** VarBind content:
+**** 1.3.6.1.4.1.27514.101.120.1 OctetString: Instance 0, Ethernet1/0/21 changed state to forwarding!
+** End of SNMP Version 2 TRAP data.
+** SNMP Version 2 TRAP received from 10.22.8.11:161:
+*** Community: public
+*** VarBind count: 3
+*** VarBind content:
+**** 1.3.6.1.2.1.2.2.1.1.21 Integer32: 21
+**** 1.3.6.1.2.1.2.2.1.7.21 Integer32: 1
+**** 1.3.6.1.2.1.2.2.1.8.21 Integer32: 1
+** End of SNMP Version 2 TRAP data.
+Программа "[16560] SnmpLog.exe" завершилась с кодом 4294967295 (0xffffffff).

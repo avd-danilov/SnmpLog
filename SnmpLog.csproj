@@ -141,5 +141,8 @@
   <ItemGroup>
     <None Include="Resources\kletku.png" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\log.txt" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

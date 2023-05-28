@@ -30,6 +30,8 @@ namespace SnmpLog
         /// </summary>
         private void InitializeComponent()
         {
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
             this.richTextBox1 = new System.Windows.Forms.RichTextBox();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.menuToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -41,11 +43,17 @@ namespace SnmpLog
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
             this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
             this.groupBoxConfigure = new System.Windows.Forms.GroupBox();
+            this.ConnectGridView = new System.Windows.Forms.DataGridView();
+            this.SwitchA = new System.Windows.Forms.DataGridViewComboBoxColumn();
+            this.SwitchNumPortA = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.SwitchB = new System.Windows.Forms.DataGridViewComboBoxColumn();
+            this.SwitchNumPortB = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.buttonSaveConn = new System.Windows.Forms.Button();
             this.ButtonDeleteSw = new System.Windows.Forms.Button();
             this.comboBoxSwitchs = new System.Windows.Forms.ComboBox();
-            this.textBoxIP = new System.Windows.Forms.TextBox();
-            this.comboBox1 = new System.Windows.Forms.ComboBox();
-            this.textBoxName = new System.Windows.Forms.TextBox();
+            this.textBoxIpSw = new System.Windows.Forms.TextBox();
+            this.comboBoxTypeSw = new System.Windows.Forms.ComboBox();
+            this.textBoxNameSw = new System.Windows.Forms.TextBox();
             this.label4 = new System.Windows.Forms.Label();
             this.labelIP = new System.Windows.Forms.Label();
             this.labelName = new System.Windows.Forms.Label();
@@ -57,6 +65,7 @@ namespace SnmpLog
             this.menuStrip1.SuspendLayout();
             this.statusStrip.SuspendLayout();
             this.groupBoxConfigure.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.ConnectGridView)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxWire)).BeginInit();
             this.SuspendLayout();
             // 
@@ -135,24 +144,93 @@ namespace SnmpLog
             // 
             // groupBoxConfigure
             // 
+            this.groupBoxConfigure.Controls.Add(this.ConnectGridView);
+            this.groupBoxConfigure.Controls.Add(this.buttonSaveConn);
             this.groupBoxConfigure.Controls.Add(this.ButtonDeleteSw);
             this.groupBoxConfigure.Controls.Add(this.comboBoxSwitchs);
-            this.groupBoxConfigure.Controls.Add(this.textBoxIP);
-            this.groupBoxConfigure.Controls.Add(this.comboBox1);
-            this.groupBoxConfigure.Controls.Add(this.textBoxName);
+            this.groupBoxConfigure.Controls.Add(this.textBoxIpSw);
+            this.groupBoxConfigure.Controls.Add(this.comboBoxTypeSw);
+            this.groupBoxConfigure.Controls.Add(this.textBoxNameSw);
             this.groupBoxConfigure.Controls.Add(this.label4);
             this.groupBoxConfigure.Controls.Add(this.labelIP);
             this.groupBoxConfigure.Controls.Add(this.labelName);
             this.groupBoxConfigure.Controls.Add(this.ButtonAddSw);
             this.groupBoxConfigure.Location = new System.Drawing.Point(895, 47);
             this.groupBoxConfigure.Name = "groupBoxConfigure";
-            this.groupBoxConfigure.Size = new System.Drawing.Size(490, 625);
+            this.groupBoxConfigure.Size = new System.Drawing.Size(490, 650);
             this.groupBoxConfigure.TabIndex = 8;
             this.groupBoxConfigure.TabStop = false;
             // 
+            // ConnectGridView
+            // 
+            this.ConnectGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.ConnectGridView.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.SwitchA,
+            this.SwitchNumPortA,
+            this.SwitchB,
+            this.SwitchNumPortB});
+            this.ConnectGridView.Location = new System.Drawing.Point(6, 291);
+            this.ConnectGridView.MultiSelect = false;
+            this.ConnectGridView.Name = "ConnectGridView";
+            this.ConnectGridView.RowHeadersWidth = 51;
+            this.ConnectGridView.RowTemplate.Height = 24;
+            this.ConnectGridView.Size = new System.Drawing.Size(403, 353);
+            this.ConnectGridView.TabIndex = 12;
+            // 
+            // SwitchA
+            // 
+            this.SwitchA.HeaderText = "Свитч";
+            this.SwitchA.MinimumWidth = 6;
+            this.SwitchA.Name = "SwitchA";
+            this.SwitchA.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            this.SwitchA.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            this.SwitchA.Width = 125;
+            // 
+            // SwitchNumPortA
+            // 
+            dataGridViewCellStyle5.Format = "0";
+            dataGridViewCellStyle5.NullValue = null;
+            this.SwitchNumPortA.DefaultCellStyle = dataGridViewCellStyle5;
+            this.SwitchNumPortA.HeaderText = "№ порта";
+            this.SwitchNumPortA.MinimumWidth = 6;
+            this.SwitchNumPortA.Name = "SwitchNumPortA";
+            this.SwitchNumPortA.Resizable = System.Windows.Forms.DataGridViewTriState.False;
+            this.SwitchNumPortA.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            this.SwitchNumPortA.Width = 50;
+            // 
+            // SwitchB
+            // 
+            this.SwitchB.HeaderText = "Свитч";
+            this.SwitchB.MinimumWidth = 6;
+            this.SwitchB.Name = "SwitchB";
+            this.SwitchB.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            this.SwitchB.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            this.SwitchB.Width = 125;
+            // 
+            // SwitchNumPortB
+            // 
+            dataGridViewCellStyle6.Format = "0";
+            this.SwitchNumPortB.DefaultCellStyle = dataGridViewCellStyle6;
+            this.SwitchNumPortB.HeaderText = "№ порта";
+            this.SwitchNumPortB.MinimumWidth = 6;
+            this.SwitchNumPortB.Name = "SwitchNumPortB";
+            this.SwitchNumPortB.Resizable = System.Windows.Forms.DataGridViewTriState.False;
+            this.SwitchNumPortB.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            this.SwitchNumPortB.Width = 50;
+            // 
+            // buttonSaveConn
+            // 
+            this.buttonSaveConn.Location = new System.Drawing.Point(6, 265);
+            this.buttonSaveConn.Name = "buttonSaveConn";
+            this.buttonSaveConn.Size = new System.Drawing.Size(172, 23);
+            this.buttonSaveConn.TabIndex = 16;
+            this.buttonSaveConn.Text = "Сохранить соединения";
+            this.buttonSaveConn.UseVisualStyleBackColor = true;
+            this.buttonSaveConn.Click += new System.EventHandler(this.buttonSaveConn_Click);
+            // 
             // ButtonDeleteSw
             // 
-            this.ButtonDeleteSw.Location = new System.Drawing.Point(153, 323);
+            this.ButtonDeleteSw.Location = new System.Drawing.Point(198, 212);
             this.ButtonDeleteSw.Name = "ButtonDeleteSw";
             this.ButtonDeleteSw.Size = new System.Drawing.Size(149, 23);
             this.ButtonDeleteSw.TabIndex = 15;
@@ -164,37 +242,38 @@ namespace SnmpLog
             // 
             this.comboBoxSwitchs.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBoxSwitchs.FormattingEnabled = true;
-            this.comboBoxSwitchs.Location = new System.Drawing.Point(26, 323);
+            this.comboBoxSwitchs.Location = new System.Drawing.Point(14, 212);
             this.comboBoxSwitchs.Name = "comboBoxSwitchs";
-            this.comboBoxSwitchs.Size = new System.Drawing.Size(121, 24);
+            this.comboBoxSwitchs.Size = new System.Drawing.Size(176, 24);
             this.comboBoxSwitchs.TabIndex = 14;
             // 
-            // textBoxIP
+            // textBoxIpSw
             // 
-            this.textBoxIP.Location = new System.Drawing.Point(189, 156);
-            this.textBoxIP.Name = "textBoxIP";
-            this.textBoxIP.Size = new System.Drawing.Size(158, 22);
-            this.textBoxIP.TabIndex = 13;
-            this.textBoxIP.Text = "127.0.0.1";
+            this.textBoxIpSw.Location = new System.Drawing.Point(189, 156);
+            this.textBoxIpSw.Name = "textBoxIpSw";
+            this.textBoxIpSw.Size = new System.Drawing.Size(158, 22);
+            this.textBoxIpSw.TabIndex = 13;
+            this.textBoxIpSw.Text = "127.0.0.1";
             // 
-            // comboBox1
+            // comboBoxTypeSw
             // 
-            this.comboBox1.FormattingEnabled = true;
-            this.comboBox1.Items.AddRange(new object[] {
-            "Qtech 4410",
-            "Qtech 8330"});
-            this.comboBox1.Location = new System.Drawing.Point(189, 118);
-            this.comboBox1.Name = "comboBox1";
-            this.comboBox1.Size = new System.Drawing.Size(158, 24);
-            this.comboBox1.TabIndex = 11;
+            this.comboBoxTypeSw.FormattingEnabled = true;
+            this.comboBoxTypeSw.Items.AddRange(new object[] {
+            "QSW4610",
+            "QSW8330"});
+            this.comboBoxTypeSw.Location = new System.Drawing.Point(189, 118);
+            this.comboBoxTypeSw.Name = "comboBoxTypeSw";
+            this.comboBoxTypeSw.Size = new System.Drawing.Size(158, 24);
+            this.comboBoxTypeSw.TabIndex = 11;
+            this.comboBoxTypeSw.SelectedIndexChanged += new System.EventHandler(this.comboBox1_SelectedIndexChanged);
             // 
-            // textBoxName
+            // textBoxNameSw
             // 
-            this.textBoxName.Location = new System.Drawing.Point(189, 83);
-            this.textBoxName.Name = "textBoxName";
-            this.textBoxName.Size = new System.Drawing.Size(158, 22);
-            this.textBoxName.TabIndex = 9;
-            this.textBoxName.Text = "Name";
+            this.textBoxNameSw.Location = new System.Drawing.Point(189, 83);
+            this.textBoxNameSw.Name = "textBoxNameSw";
+            this.textBoxNameSw.Size = new System.Drawing.Size(158, 22);
+            this.textBoxNameSw.TabIndex = 9;
+            this.textBoxNameSw.Text = "Name";
             // 
             // label4
             // 
@@ -293,6 +372,7 @@ namespace SnmpLog
             this.statusStrip.PerformLayout();
             this.groupBoxConfigure.ResumeLayout(false);
             this.groupBoxConfigure.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.ConnectGridView)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxWire)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -312,18 +392,24 @@ namespace SnmpLog
         private System.Windows.Forms.SaveFileDialog saveFileDialog1;
         private System.Windows.Forms.GroupBox groupBoxConfigure;
         private System.Windows.Forms.Button ButtonAddSw;
-        private System.Windows.Forms.ComboBox comboBox1;
-        private System.Windows.Forms.TextBox textBoxName;
+        private System.Windows.Forms.ComboBox comboBoxTypeSw;
+        private System.Windows.Forms.TextBox textBoxNameSw;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Label labelIP;
         private System.Windows.Forms.Label labelName;
-        private TextBox textBoxIP;
+        private TextBox textBoxIpSw;
         private ComboBox comboBoxSwitchs;
         private Button ButtonDeleteSw;
         private ListView listView1;
         private ColumnHeader columnHeader1;
         private ColumnHeader columnHeader2;
         private PictureBox pictureBoxWire;
+        private DataGridView ConnectGridView;
+        private Button buttonSaveConn;
+        private DataGridViewComboBoxColumn SwitchA;
+        private DataGridViewTextBoxColumn SwitchNumPortA;
+        private DataGridViewComboBoxColumn SwitchB;
+        private DataGridViewTextBoxColumn SwitchNumPortB;
     }
 }
 
