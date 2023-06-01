@@ -49,14 +49,16 @@ namespace SnmpLog
             public string Name { get; set; }
             public string Type { get; set; }
             public Point Location { get; set; }
+            public bool Status { get; set; }
 
 
-            public MySwitchs(string Name, IPAddress IPAddress, string Type, Point Location)
+            public MySwitchs(string Name, IPAddress IPAddress, string Type, Point Location, bool status)
             {
                 this.Name = Name;
                 this.IPAddress = IPAddress;
                 this.Type = Type;
                 this.Location = Location;
+                this.Status = status;
             }
         }
 
@@ -67,6 +69,8 @@ namespace SnmpLog
         public XDocument xdocSwitch;
         public XElement switches = new XElement("switches");
         public XElement connections = new XElement("connections");
+        public SoundPlayer player = new SoundPlayer();
+
         public class DrawLines
         {
             public Pen pen_ok = new Pen(Color.LightGreen)
@@ -107,12 +111,6 @@ namespace SnmpLog
             openFileDialog1.FileName = "";
             saveFileDialog1.Filter = "Text files(*.txt)|*.txt|All files(*.*)|*.*";
             groupBoxConfigure.Visible = false;
-
-
-
-
-
-
         }
 
         public void DrawWireSwitch()
@@ -120,18 +118,17 @@ namespace SnmpLog
             DrawLines drawWire = new DrawLines();
             Graphics activememo = pictureBoxWire.CreateGraphics();
             activememo.Clear(System.Drawing.SystemColors.ControlLight);
-            //    drawWire.CreateWire(activeSwitchs[0].Location, activeSwitchs[1].Location, drawWire.pen_ok, activememo);
-            //    drawWire.CreateWire(activeSwitchs[1].Location, activeSwitchs[2].Location, drawWire.pen_ok, activememo);
-            //    drawWire.CreateWire(activeSwitchs[0].Location, activeSwitchs[2].Location, drawWire.pen_bad, activememo);
+            drawWire.CreateWire(activeSwitchs[0].Location, activeSwitchs[1].Location, drawWire.pen_ok, activememo);
+            drawWire.CreateWire(activeSwitchs[1].Location, activeSwitchs[2].Location, drawWire.pen_ok, activememo);
+            drawWire.CreateWire(activeSwitchs[0].Location, activeSwitchs[2].Location, drawWire.pen_bad, activememo);
         }
         public void Upd_Form(UpdSwStruct fromSnmp)
         {
 
-            statusStrip.Items.Add(fromSnmp.strip.Items.ToString());
-            SoundPlayer player = new SoundPlayer();
+            //statusStrip.Items.Add(fromSnmp.strip.Items.ToString());
+            
             player.Stream = Properties.Resources.audio_editor_output;
             var builder01 = new StringBuilder();
-            //builder01.Append(System.DateTime.Now + ": "  + fromSnmp.snmp_packet.Pdu.AgentAddress.ToString() + "\r\n");
 
             Console.WriteLine("** SNMP Version 1 TRAP received from {0}:", fromSnmp.snmp_source_ip.ToString());
             Console.WriteLine("*** Trap generic: {0}", fromSnmp.snmp_packet.Pdu.Generic);
@@ -150,6 +147,7 @@ namespace SnmpLog
                         {
                             builder01.Append(System.DateTime.Now + "    " + d.Name + fromSnmp.snmp_packet.Pdu.AgentAddress.ToString() + " " + v.Value.ToString() + "\r\n");
                             richTextBox1.AppendText(builder01.ToString());
+
                         }
 
                     }
@@ -255,7 +253,7 @@ namespace SnmpLog
                     pctbx.MouseUp += Pctbx_MouseUp;
                     pctbx.Paint += Pctbx_Paint;
 
-                    activeSwitchs.Add(new MySwitchs(name.Value, Parse(ipadd.Value), type.Value, pctbx.Location)); ;
+                    activeSwitchs.Add(new MySwitchs(name.Value, Parse(ipadd.Value), type.Value, pctbx.Location, false)); ;
                     i++;
                 }
             }
@@ -301,7 +299,6 @@ namespace SnmpLog
                 Location = new System.Drawing.Point(rnd.Next(50, 200), rnd.Next(50, 200)),
                 Name = textBoxNameSw.Text,
 
-
             };
             Controls.Add(pctbx);
             pctbx.BringToFront();
@@ -334,12 +331,7 @@ namespace SnmpLog
             xdocSwitch.Save("default.xml");
 
 
-            activeSwitchs.Add(new MySwitchs(textBoxNameSw.Text, Parse(textBoxIpSw.Text), comboBoxTypeSw.Text, pctbx.Location));
-
-
-
-
-
+            activeSwitchs.Add(new MySwitchs(textBoxNameSw.Text, Parse(textBoxIpSw.Text), comboBoxTypeSw.Text, pctbx.Location, false));
 
             i++;
         }
@@ -395,7 +387,6 @@ namespace SnmpLog
                     }
                 }
 
-
             }
 
         }
@@ -427,15 +418,12 @@ namespace SnmpLog
         {
             moveobj = true;
             sender.GetType().GetProperty("BackColor").SetValue(sender, System.Drawing.SystemColors.AppWorkspace);
-
-
         }
 
 
         private void buttonDeleteSw_Click(object sender, EventArgs e)
         {
             if (comboBoxSwitchs.Text == "") return;
-            //XDocument switches = XDocument.Load("default.xml");
             PictureBox actpctbx = Controls[(comboBoxSwitchs.Text)] as PictureBox;
             actpctbx.Dispose();
             foreach (MySwitchs CurrSwitch in activeSwitchs)
@@ -444,10 +432,23 @@ namespace SnmpLog
                 if (CurrSwitch.Name == comboBoxSwitchs.Text)
                 {
                     XElement switches = xdocSwitch.Element("switches");
+                    foreach (XElement connect in switches.Elements("connections"))
+                    {
+                        if (!connect.IsEmpty)
+                        {
+                            var switchNameA = connect.Element("switch_a").Value;
+                            var switchNameB = connect.Element("switch_b").Value;
+                            if (CurrSwitch.Name == switchNameA || CurrSwitch.Name == switchNameB)
+                                connect.Remove();
+
+                        }
+
+                    }
+
+                    
                     foreach (XElement currsw in switches.Elements("switch"))
                     {
                         var name = currsw.Attribute("name");
-
                         if (CurrSwitch.Name == name.Value)
                         {
                             MessageBox.Show(name.ToString());
@@ -457,12 +458,14 @@ namespace SnmpLog
                         }
 
                     }
-                    switches.Save("default.xml");
 
+
+                    switches.Save("default.xml");
                     activeSwitchs.RemoveAt(activeSwitchs.IndexOf(CurrSwitch));
                     comboBoxSwitchs.Items.Remove(comboBoxSwitchs.SelectedItem);
-
                     comboBoxSwitchs.Text = "";
+
+
                     ConnectGridViev_Update();
                     break;
                 }
@@ -474,15 +477,13 @@ namespace SnmpLog
         private void ConnectGridViev_Update()
         {
             while (ConnectGridView.Rows.Count > 1)
+            {
                 ConnectGridView.Rows.Remove(ConnectGridView.Rows[0]);
+            }
 
-
-
-
-            
             xdocSwitch = XDocument.Load("default.xml");
             XElement switches = xdocSwitch.Element("switches");
-            if (connections.IsEmpty)
+            if (!switches.IsEmpty)
             {
                 // проходим по всем элементам connections
                 foreach (XElement connect in switches.Elements("connections"))
@@ -516,14 +517,12 @@ namespace SnmpLog
             if (File.Exists("default.xml"))
             {
                 xdocSwitch = XDocument.Load("default.xml");
-
             }
 
             else
             {
                 MessageBox.Show("Файл настроек не найден");
                 xdocSwitch = new XDocument();
-
                 xdocSwitch.Add(switches);
                 XElement swConn = new XElement("connections");
                 XElement swRoot = xdocSwitch.Element("switches");
@@ -548,11 +547,6 @@ namespace SnmpLog
 
         }
 
-        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
-        {
-
-        }
-
 
 
 
@@ -561,6 +555,7 @@ namespace SnmpLog
 
             public static ListView statuslist;
             public static RichTextBox statusTextBox;
+
 
             public SnmpFunction(ListView list, RichTextBox statusTextbox)
             {
@@ -769,8 +764,9 @@ namespace SnmpLog
                 catch (Exception e)
                 {
                     if (e.Message == "Request has reached maximum retries.")
-
-                        MessageBox.Show("Err SNMP. Адрес не отвечает" + selectedSwitch.IPAddress.ToString());
+        
+                    statusTextBox.AppendText ("Err SNMP. Адрес не отвечает" + selectedSwitch.IPAddress.ToString() + "\r\n");
+                   
                     return;
                 }
 
@@ -783,12 +779,12 @@ namespace SnmpLog
         private void buttonSaveConn_Click(object sender, EventArgs e)
         {
 
-                xdocSwitch = XDocument.Load("default.xml");
+            xdocSwitch = XDocument.Load("default.xml");
             XElement root = xdocSwitch.Root;
-                var connections = root.Elements("connections");
-                connections.Remove();
+            var connections = root.Elements("connections");
+            connections.Remove();
             
-            xdocSwitch.Save("default.xml");
+            //xdocSwitch.Save("default.xml");
             try
 
             {
@@ -817,15 +813,15 @@ namespace SnmpLog
                     root.Add(swConnElement);
                 }
                 root.Save("default.xml");
-                //xdocSwitch.Save("default.xml");
             }
+
             catch (Exception ex)
             {
-                MessageBox.Show(ex.ToString());
-                
+                MessageBox.Show("Ошибка при заполнении полей");
+                return;
+
             }
-            
-            //xdocSwitch.Save("default.xml");
+
             ConnectGridViev_Update();
         }
     }

@@ -30,8 +30,9 @@ namespace SnmpLog
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
+            this.components = new System.ComponentModel.Container();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
             this.richTextBox1 = new System.Windows.Forms.RichTextBox();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.menuToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -62,6 +63,8 @@ namespace SnmpLog
             this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.pictureBoxWire = new System.Windows.Forms.PictureBox();
+            this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
+            this.timer_update = new System.Windows.Forms.Timer(this.components);
             this.menuStrip1.SuspendLayout();
             this.statusStrip.SuspendLayout();
             this.groupBoxConfigure.SuspendLayout();
@@ -125,7 +128,8 @@ namespace SnmpLog
             // 
             this.statusStrip.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.statusStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripStatusLabel});
+            this.toolStripStatusLabel,
+            this.toolStripStatusLabel1});
             this.statusStrip.Location = new System.Drawing.Point(0, 706);
             this.statusStrip.Name = "statusStrip";
             this.statusStrip.Size = new System.Drawing.Size(1397, 26);
@@ -155,7 +159,7 @@ namespace SnmpLog
             this.groupBoxConfigure.Controls.Add(this.labelIP);
             this.groupBoxConfigure.Controls.Add(this.labelName);
             this.groupBoxConfigure.Controls.Add(this.ButtonAddSw);
-            this.groupBoxConfigure.Location = new System.Drawing.Point(895, 47);
+            this.groupBoxConfigure.Location = new System.Drawing.Point(895, 48);
             this.groupBoxConfigure.Name = "groupBoxConfigure";
             this.groupBoxConfigure.Size = new System.Drawing.Size(490, 650);
             this.groupBoxConfigure.TabIndex = 8;
@@ -188,9 +192,9 @@ namespace SnmpLog
             // 
             // SwitchNumPortA
             // 
-            dataGridViewCellStyle5.Format = "0";
-            dataGridViewCellStyle5.NullValue = null;
-            this.SwitchNumPortA.DefaultCellStyle = dataGridViewCellStyle5;
+            dataGridViewCellStyle1.Format = "0";
+            dataGridViewCellStyle1.NullValue = null;
+            this.SwitchNumPortA.DefaultCellStyle = dataGridViewCellStyle1;
             this.SwitchNumPortA.HeaderText = "№ порта";
             this.SwitchNumPortA.MinimumWidth = 6;
             this.SwitchNumPortA.Name = "SwitchNumPortA";
@@ -209,8 +213,8 @@ namespace SnmpLog
             // 
             // SwitchNumPortB
             // 
-            dataGridViewCellStyle6.Format = "0";
-            this.SwitchNumPortB.DefaultCellStyle = dataGridViewCellStyle6;
+            dataGridViewCellStyle2.Format = "0";
+            this.SwitchNumPortB.DefaultCellStyle = dataGridViewCellStyle2;
             this.SwitchNumPortB.HeaderText = "№ порта";
             this.SwitchNumPortB.MinimumWidth = 6;
             this.SwitchNumPortB.Name = "SwitchNumPortB";
@@ -265,7 +269,6 @@ namespace SnmpLog
             this.comboBoxTypeSw.Name = "comboBoxTypeSw";
             this.comboBoxTypeSw.Size = new System.Drawing.Size(158, 24);
             this.comboBoxTypeSw.TabIndex = 11;
-            this.comboBoxTypeSw.SelectedIndexChanged += new System.EventHandler(this.comboBox1_SelectedIndexChanged);
             // 
             // textBoxNameSw
             // 
@@ -348,6 +351,11 @@ namespace SnmpLog
             this.pictureBoxWire.TabStop = false;
             this.pictureBoxWire.MouseDown += new System.Windows.Forms.MouseEventHandler(this.Form1_MouseDown);
             // 
+            // toolStripStatusLabel1
+            // 
+            this.toolStripStatusLabel1.Name = "toolStripStatusLabel1";
+            this.toolStripStatusLabel1.Size = new System.Drawing.Size(0, 20);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -410,6 +418,8 @@ namespace SnmpLog
         private DataGridViewTextBoxColumn SwitchNumPortA;
         private DataGridViewComboBoxColumn SwitchB;
         private DataGridViewTextBoxColumn SwitchNumPortB;
+        private ToolStripStatusLabel toolStripStatusLabel1;
+        private Timer timer_update;
     }
 }
 
