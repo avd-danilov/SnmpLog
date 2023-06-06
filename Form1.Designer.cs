@@ -41,6 +41,7 @@ namespace SnmpLog
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.statusStrip = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
+            this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
             this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
             this.groupBoxConfigure = new System.Windows.Forms.GroupBox();
@@ -63,8 +64,9 @@ namespace SnmpLog
             this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.pictureBoxWire = new System.Windows.Forms.PictureBox();
-            this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
             this.timer_update = new System.Windows.Forms.Timer(this.components);
+            this.label1 = new System.Windows.Forms.Label();
+            this.textBox1 = new System.Windows.Forms.TextBox();
             this.menuStrip1.SuspendLayout();
             this.statusStrip.SuspendLayout();
             this.groupBoxConfigure.SuspendLayout();
@@ -142,12 +144,19 @@ namespace SnmpLog
             this.toolStripStatusLabel.Size = new System.Drawing.Size(34, 20);
             this.toolStripStatusLabel.Text = "ПО:";
             // 
+            // toolStripStatusLabel1
+            // 
+            this.toolStripStatusLabel1.Name = "toolStripStatusLabel1";
+            this.toolStripStatusLabel1.Size = new System.Drawing.Size(0, 20);
+            // 
             // openFileDialog1
             // 
             this.openFileDialog1.FileName = "openFileDialog1";
             // 
             // groupBoxConfigure
             // 
+            this.groupBoxConfigure.Controls.Add(this.textBox1);
+            this.groupBoxConfigure.Controls.Add(this.label1);
             this.groupBoxConfigure.Controls.Add(this.ConnectGridView);
             this.groupBoxConfigure.Controls.Add(this.buttonSaveConn);
             this.groupBoxConfigure.Controls.Add(this.ButtonDeleteSw);
@@ -351,10 +360,22 @@ namespace SnmpLog
             this.pictureBoxWire.TabStop = false;
             this.pictureBoxWire.MouseDown += new System.Windows.Forms.MouseEventHandler(this.Form1_MouseDown);
             // 
-            // toolStripStatusLabel1
+            // label1
             // 
-            this.toolStripStatusLabel1.Name = "toolStripStatusLabel1";
-            this.toolStripStatusLabel1.Size = new System.Drawing.Size(0, 20);
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(253, 29);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(170, 16);
+            this.label1.TabIndex = 17;
+            this.label1.Text = "Период обновления, сек.";
+            // 
+            // textBox1
+            // 
+            this.textBox1.Location = new System.Drawing.Point(429, 26);
+            this.textBox1.Name = "textBox1";
+            this.textBox1.Size = new System.Drawing.Size(45, 22);
+            this.textBox1.TabIndex = 18;
+            this.textBox1.Text = "5";
             // 
             // Form1
             // 
@@ -420,6 +441,8 @@ namespace SnmpLog
         private DataGridViewTextBoxColumn SwitchNumPortB;
         private ToolStripStatusLabel toolStripStatusLabel1;
         private Timer timer_update;
+        private TextBox textBox1;
+        private Label label1;
     }
 }
 

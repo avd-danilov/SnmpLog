@@ -30,6 +30,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Drawing.Drawing2D;
 using System.IO;
 using System.Xml;
+using System.Collections;
 
 namespace SnmpLog
 {
@@ -40,7 +41,8 @@ namespace SnmpLog
 
             public SnmpV1TrapPacket snmp_packet;
             public EndPoint snmp_source_ip;
-            public StatusStrip strip;
+            public string Message;
+
         }
 
         public class MySwitchs
@@ -49,16 +51,21 @@ namespace SnmpLog
             public string Name { get; set; }
             public string Type { get; set; }
             public Point Location { get; set; }
-            public bool Status { get; set; }
+            public bool State { get; set; }
+            public bool Updated { get; set; }
+            public List<bool> Ports { get; set; }
 
 
-            public MySwitchs(string Name, IPAddress IPAddress, string Type, Point Location, bool status)
+            public MySwitchs(string Name, IPAddress IPAddress, string Type, Point Location, bool State, bool Updated, List<bool> Ports)
             {
                 this.Name = Name;
                 this.IPAddress = IPAddress;
                 this.Type = Type;
                 this.Location = Location;
-                this.Status = status;
+                this.State = State;
+                this.Updated = Updated;
+                this.Ports = Ports;
+
             }
         }
 
@@ -69,7 +76,11 @@ namespace SnmpLog
         public XDocument xdocSwitch;
         public XElement switches = new XElement("switches");
         public XElement connections = new XElement("connections");
-        public SoundPlayer player = new SoundPlayer();
+        public SoundPlayer player = new SoundPlayer(Properties.Resources.audio_editor_output);
+
+        public string LogName;
+        public StringBuilder LogNameBilder = new StringBuilder();
+        public StreamWriter LogStream;
 
         public class DrawLines
         {
@@ -122,57 +133,7 @@ namespace SnmpLog
             drawWire.CreateWire(activeSwitchs[1].Location, activeSwitchs[2].Location, drawWire.pen_ok, activememo);
             drawWire.CreateWire(activeSwitchs[0].Location, activeSwitchs[2].Location, drawWire.pen_bad, activememo);
         }
-        public void Upd_Form(UpdSwStruct fromSnmp)
-        {
 
-            //statusStrip.Items.Add(fromSnmp.strip.Items.ToString());
-            
-            player.Stream = Properties.Resources.audio_editor_output;
-            var builder01 = new StringBuilder();
-
-            Console.WriteLine("** SNMP Version 1 TRAP received from {0}:", fromSnmp.snmp_source_ip.ToString());
-            Console.WriteLine("*** Trap generic: {0}", fromSnmp.snmp_packet.Pdu.Generic);
-            Console.WriteLine("*** Trap specific: {0} {1}", fromSnmp.snmp_packet.Pdu.Specific, fromSnmp.snmp_packet.Pdu.Enterprise);
-            Console.WriteLine("*** Agent address: {0}", fromSnmp.snmp_packet.Pdu.AgentAddress.ToString());
-            Console.WriteLine("*** Timestamp: {0}", fromSnmp.snmp_packet.Pdu.TimeStamp.ToString());
-            Console.WriteLine("*** VarBind count: {0}", fromSnmp.snmp_packet.Pdu.VbList.Count);
-            Console.WriteLine("*** VarBind content:");
-            foreach (Vb v in fromSnmp.snmp_packet.Pdu.VbList)
-            {
-                if (v.Oid.ToString() == "1.3.6.1.4.1.27514.101.120.1")
-                {
-                    foreach (MySwitchs d in activeSwitchs)
-                    {
-                        if (d.IPAddress.ToString() == fromSnmp.snmp_packet.Pdu.AgentAddress.ToString())
-                        {
-                            builder01.Append(System.DateTime.Now + "    " + d.Name + fromSnmp.snmp_packet.Pdu.AgentAddress.ToString() + " " + v.Value.ToString() + "\r\n");
-                            richTextBox1.AppendText(builder01.ToString());
-
-                        }
-
-                    }
-
-                }
-                Console.WriteLine("**** {0} {1}: {2}", v.Oid.ToString(), SnmpConstants.GetTypeName(v.Value.Type), v.Value.ToString());
-
-            }
-            Console.WriteLine("** End of SNMP Version 1 TRAP data.");
-            foreach (MySwitchs d in activeSwitchs)
-            {
-                if (d.IPAddress.ToString() == fromSnmp.snmp_packet.Pdu.AgentAddress.ToString())
-                {
-                    PictureBox actpctbx = Controls[(d.Name)] as PictureBox;
-                    actpctbx.Image = global::SnmpLog.Properties.Resources.sw_ok;
-                    player.Play();
-                    if (actpctbx.Created == true)
-                    {
-                        this.TopMost = true;
-                        this.TopMost = false;
-                    }
-                }
-            }
-            DrawWireSwitch();
-        }
 
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -222,12 +183,13 @@ namespace SnmpLog
             XElement switches = xdocSwitch.Element("switches");
             if (switches != null)
             {
+                XElement type = new XElement("type");
                 // проходим по всем элементам switch
                 foreach (XElement currsw in switches.Elements("switch"))
                 {
                     var name = currsw.Attribute("name");
                     var ipadd = currsw.Element("ip");
-                    var type = currsw.Element("type");
+                    type = currsw.Element("type");
                     var loc = currsw.Element("Location");
                     var xloc = loc.Element("X");
                     var yloc = loc.Element("Y");
@@ -252,8 +214,11 @@ namespace SnmpLog
                     pctbx.MouseMove += Pctbx_MouseMove;
                     pctbx.MouseUp += Pctbx_MouseUp;
                     pctbx.Paint += Pctbx_Paint;
+                    List<bool> Ports = new List<bool>();
+                    if (type.Value == "QSW4610") while (Ports.Count < 28) Ports.Add(false);
+                    if (type.Value == "QSW8330") while (Ports.Count < 56) Ports.Add(false);
 
-                    activeSwitchs.Add(new MySwitchs(name.Value, Parse(ipadd.Value), type.Value, pctbx.Location, false)); ;
+                    activeSwitchs.Add(new MySwitchs(name.Value, Parse(ipadd.Value), type.Value, pctbx.Location, false, false, Ports)); ;
                     i++;
                 }
             }
@@ -329,9 +294,13 @@ namespace SnmpLog
 
             switches.Add(swElement);
             xdocSwitch.Save("default.xml");
+            List<bool> Ports = new List<bool>();
+            if (comboBoxTypeSw.Text == "QSW4610") while (Ports.Count < 28) Ports.Add(false);
+            if (comboBoxTypeSw.Text == "QSW8330") while (Ports.Count < 56) Ports.Add(false);
 
 
-            activeSwitchs.Add(new MySwitchs(textBoxNameSw.Text, Parse(textBoxIpSw.Text), comboBoxTypeSw.Text, pctbx.Location, false));
+
+            activeSwitchs.Add(new MySwitchs(textBoxNameSw.Text, Parse(textBoxIpSw.Text), comboBoxTypeSw.Text, pctbx.Location, false, false, Ports)); ;
 
             i++;
         }
@@ -367,7 +336,7 @@ namespace SnmpLog
 
         }
 
-        private void Pctbx_MouseUp(object sender, MouseEventArgs e)
+        private async void Pctbx_MouseUp(object sender, MouseEventArgs e)
         {
             moveobj = false;
             sender.GetType().GetProperty("BackColor").SetValue(sender, System.Drawing.SystemColors.Control);
@@ -381,8 +350,11 @@ namespace SnmpLog
                     if (CurrSwitch.Name == actpctbx.Name)
                     {
                         listView1.Items.Clear();
-                        SnmpFunction snmpFunction = new SnmpFunction(listView1, richTextBox1);
-                        snmpFunction.GetSnmp(activeSwitchs[activeSwitchs.IndexOf(CurrSwitch)]);
+                        //SnmpFunction snmpFunction = new SnmpFunction(listView1, richTextBox1);
+                        //snmpFunction.GetSnmp(activeSwitchs[activeSwitchs.IndexOf(CurrSwitch)]);
+                        //var progress_GetSnmp = new Progress<UpdSwStruct>(s => UI.Upd_Switch(s, activeSwitchs[activeSwitchs.IndexOf(CurrSwitch)]));
+                        //await Task.Run(() => SnmpFunction.GetSnmp(progress_GetSnmp, activeSwitchs[activeSwitchs.IndexOf(CurrSwitch)]));
+
                         break;
                     }
                 }
@@ -514,6 +486,10 @@ namespace SnmpLog
 
             pictureBoxWire.Width = listView1.Location.X - 36;
             pictureBoxWire.Height = richTextBox1.Location.Y - 60;
+            LogNameBilder.AppendFormat("{0:D2}_{1:D2}_{2}_log.csv", System.DateTime.Now.Date.Day, System.DateTime.Now.Date.Month, System.DateTime.Now.Date.Year);
+            LogName = LogNameBilder.ToString();
+            LogStream = new StreamWriter(LogName, true, System.Text.Encoding.Default);
+
             if (File.Exists("default.xml"))
             {
                 xdocSwitch = XDocument.Load("default.xml");
@@ -530,9 +506,40 @@ namespace SnmpLog
                 xdocSwitch.Save("default.xml");
             }
             LoadSwitch();
-
-            var progress_recievedata = new Progress<UpdSwStruct>(s => Upd_Form(s));
+            UpdateUI();
+            var progress_recievedata = new Progress<UpdSwStruct>(s => Upd_Switch(s));
             await Task.Run(() => SnmpFunction.TrapReseive(progress_recievedata));
+            
+        }
+
+        private async void UpdateUI()
+        {
+
+            while (true)
+            {
+                if (configureToolStripMenuItem.CheckState == CheckState.Unchecked) {
+
+                    foreach (MySwitchs switchs in activeSwitchs)
+                    {
+
+                        PictureBox actpctbx = Controls[(switchs.Name)] as PictureBox;
+
+                        if (switchs.Updated == true)
+                        {
+                            if (switchs.State == true) actpctbx.Image = global::SnmpLog.Properties.Resources.sw_ok;
+                        
+                            this.TopMost = true;
+                            this.TopMost = false;
+                            player.Play();
+                            switchs.Updated = false;
+
+                        }
+                    }
+                }
+                await Task.Delay(1000);
+            }
+                
+            
 
         }
 
@@ -550,231 +557,7 @@ namespace SnmpLog
 
 
 
-        class SnmpFunction
-        {
 
-            public static ListView statuslist;
-            public static RichTextBox statusTextBox;
-
-
-            public SnmpFunction(ListView list, RichTextBox statusTextbox)
-            {
-                statuslist = list;
-                statusTextBox = statusTextbox;
-            }
-
-            public static void TrapReseive(IProgress<UpdSwStruct> progress1)
-            {
-                // Construct a socket and bind it to the trap manager port 162
-                IPEndPoint ipep = new IPEndPoint(IPAddress.Any, 162);
-                EndPoint ep = (EndPoint)ipep;
-                Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-
-                try
-                {
-                    socket.Bind(ep);
-                }
-                catch (Exception ex)
-                {
-
-                    run = false;
-                    MessageBox.Show(ex.Message);
-
-
-                }
-                // Disable timeout processing. Just block until packet is received
-                socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveTimeout, 0);
-
-                UpdSwStruct toForm;
-                int inlen = -1;
-                while (run)
-                {
-                    byte[] indata = new byte[16 * 1024];
-                    // 16KB receive buffer int inlen = 0;
-                    IPEndPoint peer = new IPEndPoint(IPAddress.Any, 0);
-                    EndPoint inep = (EndPoint)peer;
-                    try
-                    {
-                        inlen = socket.ReceiveFrom(indata, ref inep);
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine("Exception {0}", ex.Message);
-                        inlen = -1;
-                    }
-                    if (inlen > 0)
-                    {
-                        // Check protocol version int
-                        int ver = SnmpPacket.GetProtocolVersion(indata, inlen);
-                        if (ver == (int)SnmpVersion.Ver1)
-                        {
-
-                            // Parse SNMP Version 1 TRAP packet
-                            SnmpV1TrapPacket pkt = new SnmpV1TrapPacket();
-                            StatusStrip tool = new StatusStrip();
-                            pkt.decode(indata, inlen);
-                            toForm.snmp_packet = pkt;
-                            toForm.snmp_source_ip = inep;
-                            toForm.strip = tool;
-                            tool.Items.Add("Сервер запущен");
-                            progress1.Report(toForm);
-                        }
-                        else
-                        {
-                            // Parse SNMP Version 2 TRAP packet
-                            SnmpV2Packet pkt = new SnmpV2Packet();
-                            pkt.decode(indata, inlen);
-                            Console.WriteLine("** SNMP Version 2 TRAP received from {0}:", inep.ToString());
-                            if ((SnmpSharpNet.PduType)pkt.Pdu.Type != PduType.V2Trap)
-                            {
-                                Console.WriteLine("*** NOT an SNMPv2 trap ****");
-                            }
-                            else
-                            {
-                                Console.WriteLine("*** Community: {0}", pkt.Community.ToString());
-                                Console.WriteLine("*** VarBind count: {0}", pkt.Pdu.VbList.Count);
-                                Console.WriteLine("*** VarBind content:");
-                                foreach (Vb v in pkt.Pdu.VbList)
-                                {
-                                    Console.WriteLine("**** {0} {1}: {2}",
-                                        v.Oid.ToString(), SnmpConstants.GetTypeName(v.Value.Type), v.Value.ToString());
-                                }
-                                Console.WriteLine("** End of SNMP Version 2 TRAP data.");
-                            }
-                        }
-                    }
-                    else
-                    {
-                        if (inlen == 0)
-                            Console.WriteLine("Zero length packet received.");
-                    }
-                }
-                MessageBox.Show("exit");
-            }
-
-
-            public void GetSnmp(MySwitchs selectedSwitch)
-            {
-
-                // SNMP community name
-                OctetString community = new OctetString("public");
-                // Define agent parameters class
-                AgentParameters param = new AgentParameters(community);
-                // Set SNMP version to 1 (or 2)
-                param.Version = SnmpVersion.Ver1;
-                // Construct the agent address object
-                // IpAddress class is easy to use here because
-                //  it will try to resolve constructor parameter if it doesn't
-                //  parse to an IP address
-                IpAddress agent = new IpAddress(selectedSwitch.IPAddress);
-                // Construct target
-                UdpTarget target = new UdpTarget((IPAddress)agent, 161, 2000, 1);
-                // Pdu class used for all requests
-                Pdu pdu = new Pdu(PduType.Get);
-                pdu.VbList.Add("1.3.6.1.2.1.1.1.0"); //sysDescr
-                                                     //.1.3.6.1.2.1.2.2.1.2.
-
-                pdu.VbList.Add("1.3.6.1.2.1.1.2.0"); //sysObjectID
-                pdu.VbList.Add("1.3.6.1.2.1.1.3.0"); //sysUpTime
-                pdu.VbList.Add("1.3.6.1.2.1.1.4.0"); //sysContact
-                pdu.VbList.Add("1.3.6.1.2.1.1.5.0"); //sysName
-                                                     // Make SNMP request
-                for (int i = 1; i <= 28; i++)
-                {
-                    pdu.VbList.Add(".1.3.6.1.2.1.2.2.1.8." + i);
-                }
-                try
-                {
-                    SnmpV1Packet result = (SnmpV1Packet)target.Request(pdu, param);
-                    //SnmpSharpNet.SnmpException: "Request has reached maximum retries."
-
-                    // If result is null then agent didn't reply or we couldn't parse the reply.
-                    if (result != null)
-                    {
-                        // ErrorStatus other then 0 is an error returned by
-                        // the Agent - see SnmpConstants for error definitions
-                        if (result.Pdu.ErrorStatus != 0)
-                        {
-                            // agent reported an error with the request
-
-                            Console.WriteLine("Error in SNMP reply. Error {0} index {1}",
-                                result.Pdu.ErrorStatus,
-                                result.Pdu.ErrorIndex);
-                        }
-                        else
-                        {
-                            // Reply variables are returned in the same order as they were added
-                            //  to the VbList
-
-                            List<ListViewItem> myItems = new List<ListViewItem>();
-                            List<ListViewItem.ListViewSubItem> listViewSubItems = new List<ListViewItem.ListViewSubItem>();
-                            //ListViewItem.ListViewSubItem listViewSubItem = new ListViewItem.ListViewSubItem();
-                            for (int i = 1; i <= 28; i++)
-                            {
-                                if (result.Pdu.VbList[i + 4].Value.ToString() == "1")
-                                {
-                                    myItems.Add(new ListViewItem("Up"));
-                                    myItems[myItems.Count - 1].BackColor = Color.LightGreen;
-                                }
-
-                                else
-                                    myItems.Add(new ListViewItem("Down"));
-
-                                listViewSubItems.Add(new ListViewItem.ListViewSubItem());
-
-                                listViewSubItems[listViewSubItems.Count - 1].Text = result.Pdu.VbList[i + 4].Oid.ToString();
-                                myItems[myItems.Count - 1].SubItems.Add(listViewSubItems[listViewSubItems.Count - 1]);
-
-                                //statuslist.Items.Add(myItems[myItems.Count - 1]);
-
-                            }
-                            statuslist.Items.AddRange(myItems.ToArray());
-
-
-
-
-                            Console.WriteLine("sysDescr({0}) ({1}): {2}",
-                                result.Pdu.VbList[0].Oid.ToString(),
-                                SnmpConstants.GetTypeName(result.Pdu.VbList[0].Value.Type),
-                                result.Pdu.VbList[0].Value.ToString());
-                            Console.WriteLine("sysObjectID({0}) ({1}): {2}",
-                                result.Pdu.VbList[1].Oid.ToString(),
-                                SnmpConstants.GetTypeName(result.Pdu.VbList[1].Value.Type),
-                                result.Pdu.VbList[1].Value.ToString());
-                            Console.WriteLine("sysUpTime({0}) ({1}): {2}",
-                                result.Pdu.VbList[2].Oid.ToString(),
-                                SnmpConstants.GetTypeName(result.Pdu.VbList[2].Value.Type),
-                                result.Pdu.VbList[2].Value.ToString());
-                            Console.WriteLine("sysContact({0}) ({1}): {2}",
-                                result.Pdu.VbList[3].Oid.ToString(),
-                                SnmpConstants.GetTypeName(result.Pdu.VbList[3].Value.Type),
-                                result.Pdu.VbList[3].Value.ToString());
-                            Console.WriteLine("sysName({0}) ({1}): {2}",
-                                result.Pdu.VbList[4].Oid.ToString(),
-                                SnmpConstants.GetTypeName(result.Pdu.VbList[4].Value.Type),
-                                result.Pdu.VbList[4].Value.ToString());
-                        }
-                    }
-                    else
-                    {
-                        Console.WriteLine("No response received from SNMP agent.");
-                    }
-
-                }
-                catch (Exception e)
-                {
-                    if (e.Message == "Request has reached maximum retries.")
-        
-                    statusTextBox.AppendText ("Err SNMP. Адрес не отвечает" + selectedSwitch.IPAddress.ToString() + "\r\n");
-                   
-                    return;
-                }
-
-
-                target.Close();
-
-            }
-        }
 
         private void buttonSaveConn_Click(object sender, EventArgs e)
         {
@@ -823,6 +606,65 @@ namespace SnmpLog
             }
 
             ConnectGridViev_Update();
+        }
+
+
+        public void Upd_Switch (UpdSwStruct fromSnmp)
+        {
+            int t=999;
+            string StringPortNum;
+            string StringPortState;
+            string StringSearchEth = "1/0/";
+            string StringSearchState = "state to ";
+            foreach (MySwitchs CurrentSwitch in activeSwitchs)
+            {
+                if (CurrentSwitch.IPAddress.ToString() == fromSnmp.snmp_packet.Pdu.AgentAddress.ToString())
+                {
+                    CurrentSwitch.State = true;
+                    CurrentSwitch.Updated = true;
+                    t = activeSwitchs.IndexOf(CurrentSwitch);
+                }
+
+            }
+            if (t == 999) return;
+            var builderText = new StringBuilder();
+
+            Console.WriteLine("** SNMP Version 1 TRAP received from {0}:", fromSnmp.snmp_source_ip.ToString());
+            Console.WriteLine("*** Trap generic: {0}", fromSnmp.snmp_packet.Pdu.Generic);
+            Console.WriteLine("*** Trap specific: {0} {1}", fromSnmp.snmp_packet.Pdu.Specific, fromSnmp.snmp_packet.Pdu.Enterprise);
+            Console.WriteLine("*** Agent address: {0}", fromSnmp.snmp_packet.Pdu.AgentAddress.ToString());
+            Console.WriteLine("*** Timestamp: {0}", fromSnmp.snmp_packet.Pdu.TimeStamp.ToString());
+            Console.WriteLine("*** VarBind count: {0}", fromSnmp.snmp_packet.Pdu.VbList.Count);
+            Console.WriteLine("*** VarBind content:");
+
+            foreach (Vb v in fromSnmp.snmp_packet.Pdu.VbList)
+            {
+                if (v.Oid.ToString() == "1.3.6.1.4.1.27514.101.120.1")          // Находим Сообщение от порта
+                {
+                    StringPortNum = v.Value.ToString();                            // Найдем в тексте Номер порта
+                    StringPortNum = StringPortNum.Substring(StringPortNum.LastIndexOf(StringSearchEth)+4,2);
+                    StringPortNum = StringPortNum.Trim();
+
+                    StringPortState = v.Value.ToString();                           // Найдем в тексте статус порта
+                    StringPortState = StringPortState.Substring(StringPortState.LastIndexOf(StringSearchState)+9);
+                    if (StringPortState == "discarding!")
+                        activeSwitchs[t].Ports[int.Parse(StringPortNum)] = false;
+                    if (StringPortState == "learning!")
+                        activeSwitchs[t].Ports[int.Parse(StringPortNum)] = false;
+                    if (StringPortState == "forwarding!")
+                        activeSwitchs[t].Ports[int.Parse(StringPortNum)] = true;
+
+                    builderText.Append(System.DateTime.Now + "    " + activeSwitchs[t].Name + fromSnmp.snmp_packet.Pdu.AgentAddress.ToString() + " " + v.Value.ToString() + "\r\n");
+                    richTextBox1.AppendText(builderText.ToString());
+                    builderText.Clear();
+                    builderText.AppendFormat("{0}\t{1}\tПорт №{2:D2}\t{3}\r\n", System.DateTime.Now, activeSwitchs[t].Name, StringPortNum, StringPortState);
+                    LogStream.Write(builderText);
+                    LogStream.Flush();
+
+                }
+                Console.WriteLine("**** {0} {1}: {2}", v.Oid.ToString(), SnmpConstants.GetTypeName(v.Value.Type), v.Value.ToString());
+            }
+            Console.WriteLine("** End of SNMP Version 1 TRAP data.");
         }
     }
 }
