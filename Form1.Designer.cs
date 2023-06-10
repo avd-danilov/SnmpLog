@@ -45,6 +45,8 @@ namespace SnmpLog
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
             this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
             this.groupBoxConfigure = new System.Windows.Forms.GroupBox();
+            this.textBoxUpdTime = new System.Windows.Forms.TextBox();
+            this.label1 = new System.Windows.Forms.Label();
             this.ConnectGridView = new System.Windows.Forms.DataGridView();
             this.SwitchA = new System.Windows.Forms.DataGridViewComboBoxColumn();
             this.SwitchNumPortA = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -65,8 +67,6 @@ namespace SnmpLog
             this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.pictureBoxWire = new System.Windows.Forms.PictureBox();
             this.timer_update = new System.Windows.Forms.Timer(this.components);
-            this.label1 = new System.Windows.Forms.Label();
-            this.textBox1 = new System.Windows.Forms.TextBox();
             this.menuStrip1.SuspendLayout();
             this.statusStrip.SuspendLayout();
             this.groupBoxConfigure.SuspendLayout();
@@ -155,7 +155,7 @@ namespace SnmpLog
             // 
             // groupBoxConfigure
             // 
-            this.groupBoxConfigure.Controls.Add(this.textBox1);
+            this.groupBoxConfigure.Controls.Add(this.textBoxUpdTime);
             this.groupBoxConfigure.Controls.Add(this.label1);
             this.groupBoxConfigure.Controls.Add(this.ConnectGridView);
             this.groupBoxConfigure.Controls.Add(this.buttonSaveConn);
@@ -173,6 +173,23 @@ namespace SnmpLog
             this.groupBoxConfigure.Size = new System.Drawing.Size(490, 650);
             this.groupBoxConfigure.TabIndex = 8;
             this.groupBoxConfigure.TabStop = false;
+            // 
+            // textBoxUpdTime
+            // 
+            this.textBoxUpdTime.Location = new System.Drawing.Point(429, 26);
+            this.textBoxUpdTime.Name = "textBoxUpdTime";
+            this.textBoxUpdTime.Size = new System.Drawing.Size(45, 22);
+            this.textBoxUpdTime.TabIndex = 18;
+            this.textBoxUpdTime.Text = "5";
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(253, 29);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(170, 16);
+            this.label1.TabIndex = 17;
+            this.label1.Text = "Период обновления, сек.";
             // 
             // ConnectGridView
             // 
@@ -360,23 +377,6 @@ namespace SnmpLog
             this.pictureBoxWire.TabStop = false;
             this.pictureBoxWire.MouseDown += new System.Windows.Forms.MouseEventHandler(this.Form1_MouseDown);
             // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(253, 29);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(170, 16);
-            this.label1.TabIndex = 17;
-            this.label1.Text = "Период обновления, сек.";
-            // 
-            // textBox1
-            // 
-            this.textBox1.Location = new System.Drawing.Point(429, 26);
-            this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(45, 22);
-            this.textBox1.TabIndex = 18;
-            this.textBox1.Text = "5";
-            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -441,7 +441,7 @@ namespace SnmpLog
         private DataGridViewTextBoxColumn SwitchNumPortB;
         private ToolStripStatusLabel toolStripStatusLabel1;
         private Timer timer_update;
-        private TextBox textBox1;
+        private TextBox textBoxUpdTime;
         private Label label1;
     }
 }

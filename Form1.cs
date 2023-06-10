@@ -536,7 +536,7 @@ namespace SnmpLog
                         }
                     }
                 }
-                await Task.Delay(1000);
+                await Task.Delay(int.Parse(textBoxUpdTime.Text)*1000);
             }
                 
             
