@@ -31,6 +31,7 @@ using System.Drawing.Drawing2D;
 using System.IO;
 using System.Xml;
 using System.Collections;
+using System.Runtime.Remoting.Contexts;
 
 namespace SnmpLog
 {
@@ -43,6 +44,13 @@ namespace SnmpLog
             public EndPoint snmp_source_ip;
             public string Message;
 
+        }
+        public struct ConnectionsLine
+        {
+            public string Switch_A;
+            public string Port_A;
+            public string Switch_B;
+            public string Port_B;
         }
 
         public class MySwitchs
@@ -72,6 +80,7 @@ namespace SnmpLog
         }
 
         public List<MySwitchs> activeSwitchs = new List<MySwitchs>(15);
+        public List<ConnectionsLine> activeConnections = new List<ConnectionsLine>(50);
         public UInt16 i = 0;
         bool moveobj = false;
         public static bool run = true;
@@ -126,14 +135,32 @@ namespace SnmpLog
             groupBoxConfigure.Visible = false;
         }
 
-        public void DrawWireSwitch()
+        public void DrawWireSwitch(List<ConnectionsLine> connections)
         {
             DrawLines drawWire = new DrawLines();
             Graphics activememo = pictureBoxWire.CreateGraphics();
             activememo.Clear(System.Drawing.SystemColors.ControlLight);
-            drawWire.CreateWire(activeSwitchs[0].Location, activeSwitchs[1].Location, drawWire.pen_ok, activememo);
-            drawWire.CreateWire(activeSwitchs[1].Location, activeSwitchs[2].Location, drawWire.pen_ok, activememo);
-            drawWire.CreateWire(activeSwitchs[0].Location, activeSwitchs[2].Location, drawWire.pen_bad, activememo);
+
+            foreach (ConnectionsLine line in connections)
+            {
+                int SwNumA = 999, SwNumB = 999;
+                foreach (MySwitchs switchs in activeSwitchs)
+                {
+                    if (line.Switch_A == switchs.Name) SwNumA = activeSwitchs.IndexOf(switchs);
+                    if (line.Switch_B == switchs.Name) SwNumB = activeSwitchs.IndexOf(switchs);
+                }
+
+                if(SwNumA != 999 && SwNumB != 999)
+                {
+                    if (activeSwitchs[SwNumA].Ports[int.Parse(line.Port_A)-1] && activeSwitchs[SwNumB].Ports[int.Parse(line.Port_A)-1])
+                    drawWire.CreateWire(activeSwitchs[SwNumA].Location, activeSwitchs[SwNumB].Location, drawWire.pen_ok, activememo);
+                    else
+                    {
+                        drawWire.CreateWire(activeSwitchs[SwNumA].Location, activeSwitchs[SwNumB].Location, drawWire.pen_bad, activememo);
+                    }
+                }
+                
+            }
         }
 
 
@@ -179,6 +206,35 @@ namespace SnmpLog
             }
         }
 
+        private void LoadConnectionLines()
+        {
+            XElement switches = xdocSwitch.Element("switches");
+            if (switches != null)
+            {
+                activeConnections.Clear();
+                // проходим по всем элементам switch
+                foreach (XElement ConnUnit in switches.Elements("connections"))
+                {
+                    if (!ConnUnit.IsEmpty)
+                    {
+                        var switchNameA = ConnUnit.Element("switch_a").Value;
+                        var portA = ConnUnit.Element("port_a").Value;
+                        var switchNameB = ConnUnit.Element("switch_b").Value;
+                        var portB = ConnUnit.Element("port_b").Value;
+                        ConnectionsLine line = new ConnectionsLine();
+                        line.Switch_A= switchNameA;
+                        line.Switch_B= switchNameB;
+                        line.Port_A= portA;
+                        line.Port_B= portB;
+                        activeConnections.Add(line);
+
+
+                    }
+
+                }
+
+            }
+        }
         private void LoadSwitch()
         {
 
@@ -530,6 +586,7 @@ namespace SnmpLog
                 xdocSwitch.Save("default.xml");
             }
             LoadSwitch();
+            LoadConnectionLines();
             UpdateUI();
             await Task.Run(() => WhoIs());
             var progress_recievedata = new Progress<UpdSwStruct>(s => Upd_Switch(s));
@@ -578,7 +635,10 @@ namespace SnmpLog
                             }
                             switchs.Updated = false;
                         }
+
                     }
+                    if(activeConnections.Count != 0)
+                    DrawWireSwitch(activeConnections);
                 }
                 await Task.Delay(1000);
             }
@@ -648,7 +708,7 @@ namespace SnmpLog
                 return;
 
             }
-
+            LoadConnectionLines();
             ConnectGridViev_Update();
         }
 
@@ -700,11 +760,11 @@ namespace SnmpLog
                     StringPortState = v.Value.ToString();                           // Найдем в тексте статус порта
                     StringPortState = StringPortState.Substring(StringPortState.LastIndexOf(StringSearchState)+9);
                     if (StringPortState == "discarding!")
-                        activeSwitchs[t].Ports[int.Parse(StringPortNum)] = false;
+                        activeSwitchs[t].Ports[int.Parse(StringPortNum)-1] = false;
                     if (StringPortState == "learning!")
-                        activeSwitchs[t].Ports[int.Parse(StringPortNum)] = false;
+                        activeSwitchs[t].Ports[int.Parse(StringPortNum)-1] = false;
                     if (StringPortState == "forwarding!")
-                        activeSwitchs[t].Ports[int.Parse(StringPortNum)] = true;
+                        activeSwitchs[t].Ports[int.Parse(StringPortNum)-1] = true;
 
                     builderText.Append(System.DateTime.Now + "    " + activeSwitchs[t].Name + fromSnmp.snmp_packet.Pdu.AgentAddress.ToString() + " " + v.Value.ToString() + "\r\n");
                     richTextBox1.AppendText(builderText.ToString());
