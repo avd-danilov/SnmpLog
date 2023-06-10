@@ -67,6 +67,7 @@ namespace SnmpLog
                         pkt.decode(indata, inlen);
                         toForm.snmp_packet = pkt;
                         toForm.snmp_source_ip = inep;
+                        toForm.Message = "trap";
                         progress.Report(toForm);
                     }
                     else
@@ -103,9 +104,8 @@ namespace SnmpLog
         }
 
 
-        public static void GetSnmp(IProgress<UpdSwStruct> progress,MySwitchs selectedSwitch)
+        public static void GetSnmp(MySwitchs selectedSwitch)
         {
-
             // SNMP community name
             OctetString community = new OctetString("public");
             // Define agent parameters class
@@ -129,7 +129,7 @@ namespace SnmpLog
             pdu.VbList.Add("1.3.6.1.2.1.1.4.0"); //sysContact
             pdu.VbList.Add("1.3.6.1.2.1.1.5.0"); //sysName
                                                  // Make SNMP request
-            for (int i = 1; i <= 28; i++)
+            for (int i = 1; i <= selectedSwitch.Ports.Count; i++)
             {
                 pdu.VbList.Add(".1.3.6.1.2.1.2.2.1.8." + i);
             }
@@ -141,6 +141,8 @@ namespace SnmpLog
                 // If result is null then agent didn't reply or we couldn't parse the reply.
                 if (result != null)
                 {
+                    selectedSwitch.State = true;
+                    selectedSwitch.Updated = true;
                     // ErrorStatus other then 0 is an error returned by
                     // the Agent - see SnmpConstants for error definitions
                     if (result.Pdu.ErrorStatus != 0)
@@ -155,34 +157,16 @@ namespace SnmpLog
                     {
                         // Reply variables are returned in the same order as they were added
                         //  to the VbList
-
-                        List<ListViewItem> myItems = new List<ListViewItem>();
-                        List<ListViewItem.ListViewSubItem> listViewSubItems = new List<ListViewItem.ListViewSubItem>();
-                        //ListViewItem.ListViewSubItem listViewSubItem = new ListViewItem.ListViewSubItem();
-                        for (int i = 1; i <= 28; i++)
+                        for (int i = 1; i <= selectedSwitch.Ports.Count; i++)
                         {
                             if (result.Pdu.VbList[i + 4].Value.ToString() == "1")
                             {
-                                myItems.Add(new ListViewItem("Up"));
-                                myItems[myItems.Count - 1].BackColor = Color.LightGreen;
+                                selectedSwitch.Ports[i-1] = true;
                             }
-
                             else
-                                myItems.Add(new ListViewItem("Down"));
-
-                            listViewSubItems.Add(new ListViewItem.ListViewSubItem());
-
-                            listViewSubItems[listViewSubItems.Count - 1].Text = result.Pdu.VbList[i + 4].Oid.ToString();
-                            myItems[myItems.Count - 1].SubItems.Add(listViewSubItems[listViewSubItems.Count - 1]);
-
-                            //statuslist.Items.Add(myItems[myItems.Count - 1]);
-
+                                selectedSwitch.Ports[i-1] = false;
                         }
-                        //statuslist.Items.AddRange(myItems.ToArray());
-
-
-
-
+                        selectedSwitch.Uptime = result.Pdu.VbList[2].Value.ToString();
                         Console.WriteLine("sysDescr({0}) ({1}): {2}",
                             result.Pdu.VbList[0].Oid.ToString(),
                             SnmpConstants.GetTypeName(result.Pdu.VbList[0].Value.Type),
@@ -208,14 +192,20 @@ namespace SnmpLog
                 else
                 {
                     Console.WriteLine("No response received from SNMP agent.");
+                    //progress.Report(toForm);
                 }
 
             }
             catch (Exception e)
             {
                 if (e.Message == "Request has reached maximum retries.")
-
-                    //statusTextBox.AppendText("Err SNMP. Адрес не отвечает" + selectedSwitch.IPAddress.ToString() + "\r\n");
+                selectedSwitch.State = false;
+                selectedSwitch.Updated = true;
+                for (int i=0; i<selectedSwitch.Ports.Count; i++)
+                {
+                    selectedSwitch.Ports[i] = false;
+                }
+                //statusTextBox.AppendText("Err SNMP. Адрес не отвечает" + selectedSwitch.IPAddress.ToString() + "\r\n");
 
                 return;
             }

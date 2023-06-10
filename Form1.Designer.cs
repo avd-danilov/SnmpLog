@@ -31,8 +31,8 @@ namespace SnmpLog
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
             this.richTextBox1 = new System.Windows.Forms.RichTextBox();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.menuToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -65,6 +65,7 @@ namespace SnmpLog
             this.listView1 = new System.Windows.Forms.ListView();
             this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.pictureBoxWire = new System.Windows.Forms.PictureBox();
             this.timer_update = new System.Windows.Forms.Timer(this.components);
             this.menuStrip1.SuspendLayout();
@@ -218,9 +219,9 @@ namespace SnmpLog
             // 
             // SwitchNumPortA
             // 
-            dataGridViewCellStyle1.Format = "0";
-            dataGridViewCellStyle1.NullValue = null;
-            this.SwitchNumPortA.DefaultCellStyle = dataGridViewCellStyle1;
+            dataGridViewCellStyle3.Format = "0";
+            dataGridViewCellStyle3.NullValue = null;
+            this.SwitchNumPortA.DefaultCellStyle = dataGridViewCellStyle3;
             this.SwitchNumPortA.HeaderText = "№ порта";
             this.SwitchNumPortA.MinimumWidth = 6;
             this.SwitchNumPortA.Name = "SwitchNumPortA";
@@ -239,8 +240,8 @@ namespace SnmpLog
             // 
             // SwitchNumPortB
             // 
-            dataGridViewCellStyle2.Format = "0";
-            this.SwitchNumPortB.DefaultCellStyle = dataGridViewCellStyle2;
+            dataGridViewCellStyle4.Format = "0";
+            this.SwitchNumPortB.DefaultCellStyle = dataGridViewCellStyle4;
             this.SwitchNumPortB.HeaderText = "№ порта";
             this.SwitchNumPortB.MinimumWidth = 6;
             this.SwitchNumPortB.Name = "SwitchNumPortB";
@@ -345,7 +346,8 @@ namespace SnmpLog
             // 
             this.listView1.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.columnHeader1,
-            this.columnHeader2});
+            this.columnHeader2,
+            this.columnHeader3});
             this.listView1.FullRowSelect = true;
             this.listView1.GridLines = true;
             this.listView1.HideSelection = false;
@@ -359,13 +361,19 @@ namespace SnmpLog
             // 
             // columnHeader1
             // 
-            this.columnHeader1.Text = "Тип";
-            this.columnHeader1.Width = 77;
+            this.columnHeader1.Text = "Порт";
+            this.columnHeader1.Width = 45;
             // 
             // columnHeader2
             // 
-            this.columnHeader2.Text = "Данные";
-            this.columnHeader2.Width = 197;
+            this.columnHeader2.Text = "Состояние";
+            this.columnHeader2.Width = 120;
+            // 
+            // columnHeader3
+            // 
+            this.columnHeader3.Text = "Данные";
+            this.columnHeader3.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            this.columnHeader3.Width = 197;
             // 
             // pictureBoxWire
             // 
@@ -443,6 +451,7 @@ namespace SnmpLog
         private Timer timer_update;
         private TextBox textBoxUpdTime;
         private Label label1;
+        private ColumnHeader columnHeader3;
     }
 }
 

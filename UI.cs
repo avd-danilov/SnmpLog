@@ -6,6 +6,8 @@ using System.Text;
 using System.Threading.Tasks;
 using static SnmpLog.Form1;
 using System.Windows.Forms;
+using System.Drawing;
+using static System.Windows.Forms.ListViewItem;
 
 namespace SnmpLog
 {
@@ -107,5 +109,45 @@ namespace SnmpLog
         //}
     }
 }
+// Reply variables are returned in the same order as they were added
+//  to the VbList
 
-    
+//List<ListViewItem> myItems = new List<ListViewItem>();
+//List<ListViewItem.ListViewSubItem> listViewSubItems = new List<ListViewItem.ListViewSubItem>();
+////ListViewItem.ListViewSubItem listViewSubItem = new ListViewItem.ListViewSubItem();
+//for (int i = 1; i <= selectedSwitch.Ports.Count; i++)
+//{
+//    if (result.Pdu.VbList[i + 4].Value.ToString() == "1")
+//    {
+//        myItems.Add(new ListViewItem("Up"));
+//        myItems[myItems.Count - 1].BackColor = Color.LightGreen;
+//    }
+
+//    else
+//        myItems.Add(new ListViewItem("Down"));
+
+//    listViewSubItems.Add(new ListViewItem.ListViewSubItem());
+
+//    listViewSubItems[listViewSubItems.Count - 1].Text = result.Pdu.VbList[i + 4].Oid.ToString();
+//    myItems[myItems.Count - 1].SubItems.Add(listViewSubItems[listViewSubItems.Count - 1]);
+
+//                            //statuslist.Items.Add(myItems[myItems.Count - 1]);
+
+
+
+
+
+//listViewSubItems.Add(new ListViewItem.ListViewSubItem());
+
+//listViewSubItems[listViewSubItems.Count - 1].Text = result.Pdu.VbList[i + 4].Oid.ToString();
+//myItems[myItems.Count - 1].SubItems.Add(listViewSubItems[listViewSubItems.Count - 1]);
+
+////statuslist.Items.Add(myItems[myItems.Count - 1]);
+
+
+
+
+//statuslist.Items.AddRange(myItems.ToArray());
+
+
+

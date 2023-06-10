@@ -54,9 +54,10 @@ namespace SnmpLog
             public bool State { get; set; }
             public bool Updated { get; set; }
             public List<bool> Ports { get; set; }
+            public string Uptime { get; set; }
 
 
-            public MySwitchs(string Name, IPAddress IPAddress, string Type, Point Location, bool State, bool Updated, List<bool> Ports)
+            public MySwitchs(string Name, IPAddress IPAddress, string Type, Point Location, bool State, bool Updated, List<bool> Ports, string Uptime)
             {
                 this.Name = Name;
                 this.IPAddress = IPAddress;
@@ -65,6 +66,7 @@ namespace SnmpLog
                 this.State = State;
                 this.Updated = Updated;
                 this.Ports = Ports;
+                this.Uptime = Uptime;
 
             }
         }
@@ -218,7 +220,7 @@ namespace SnmpLog
                     if (type.Value == "QSW4610") while (Ports.Count < 28) Ports.Add(false);
                     if (type.Value == "QSW8330") while (Ports.Count < 56) Ports.Add(false);
 
-                    activeSwitchs.Add(new MySwitchs(name.Value, Parse(ipadd.Value), type.Value, pctbx.Location, false, false, Ports)); ;
+                    activeSwitchs.Add(new MySwitchs(name.Value, Parse(ipadd.Value), type.Value, pctbx.Location, false, false, Ports, "")); ;
                     i++;
                 }
             }
@@ -300,7 +302,7 @@ namespace SnmpLog
 
 
 
-            activeSwitchs.Add(new MySwitchs(textBoxNameSw.Text, Parse(textBoxIpSw.Text), comboBoxTypeSw.Text, pctbx.Location, false, false, Ports)); ;
+            activeSwitchs.Add(new MySwitchs(textBoxNameSw.Text, Parse(textBoxIpSw.Text), comboBoxTypeSw.Text, pctbx.Location, false, false, Ports, "")); ;
 
             i++;
         }
@@ -345,16 +347,38 @@ namespace SnmpLog
             {
 
                 PictureBox actpctbx = sender as PictureBox;
-                foreach (MySwitchs CurrSwitch in activeSwitchs)
+                foreach (MySwitchs switchs in activeSwitchs)
                 {
-                    if (CurrSwitch.Name == actpctbx.Name)
+                    if (switchs.Name == actpctbx.Name)
                     {
                         listView1.Items.Clear();
-                        //SnmpFunction snmpFunction = new SnmpFunction(listView1, richTextBox1);
-                        //snmpFunction.GetSnmp(activeSwitchs[activeSwitchs.IndexOf(CurrSwitch)]);
-                        //var progress_GetSnmp = new Progress<UpdSwStruct>(s => UI.Upd_Switch(s, activeSwitchs[activeSwitchs.IndexOf(CurrSwitch)]));
-                        //await Task.Run(() => SnmpFunction.GetSnmp(progress_GetSnmp, activeSwitchs[activeSwitchs.IndexOf(CurrSwitch)]));
 
+                        List<ListViewItem> myItems = new List<ListViewItem>();
+                        List<ListViewItem.ListViewSubItem> listViewSubItems = new List<ListViewItem.ListViewSubItem>();
+                        for (int i = 0; i < switchs.Ports.Count; i++)
+                        {
+                            if (switchs.Ports[i])
+                            {
+                                myItems.Add(new ListViewItem((i+1).ToString()));
+                                myItems[myItems.Count - 1].SubItems.Add(new ListViewItem.ListViewSubItem());
+                                myItems[myItems.Count - 1].SubItems[1].Text = "Up";
+                                myItems[myItems.Count - 1].BackColor = Color.LightGreen;
+                            }
+
+                            else
+                            {
+                                myItems.Add(new ListViewItem((i + 1).ToString()));
+                                myItems[myItems.Count - 1].SubItems.Add(new ListViewItem.ListViewSubItem());
+                                myItems[myItems.Count - 1].SubItems[1].Text = "Down";
+                            }
+                        }
+                        myItems[0].SubItems.Add(new ListViewItem.ListViewSubItem());
+                        myItems[0].SubItems[2].Text = switchs.Name;
+                        myItems[1].SubItems.Add(new ListViewItem.ListViewSubItem());
+                        myItems[1].SubItems[2].Text = switchs.IPAddress.ToString();
+                        myItems[2].SubItems.Add(new ListViewItem.ListViewSubItem());
+                        myItems[2].SubItems[2].Text = switchs.Uptime;
+                        listView1.Items.AddRange(myItems.ToArray());
                         break;
                     }
                 }
@@ -507,11 +531,29 @@ namespace SnmpLog
             }
             LoadSwitch();
             UpdateUI();
+            await Task.Run(() => WhoIs());
             var progress_recievedata = new Progress<UpdSwStruct>(s => Upd_Switch(s));
             await Task.Run(() => SnmpFunction.TrapReseive(progress_recievedata));
-            
+
         }
 
+
+        private async void WhoIs()
+        {
+            while (true)
+            {
+                if (configureToolStripMenuItem.CheckState == CheckState.Unchecked)
+                {
+                    foreach (MySwitchs switchs in activeSwitchs)
+                    {
+                        await Task.Run(() => SnmpFunction.GetSnmp(switchs));
+                        await Task.Delay(100);
+                    }
+
+                }
+                await Task.Delay(int.Parse(textBoxUpdTime.Text) * 1000);
+            }
+        }
         private async void UpdateUI()
         {
 
@@ -526,17 +568,19 @@ namespace SnmpLog
 
                         if (switchs.Updated == true)
                         {
-                            if (switchs.State == true) actpctbx.Image = global::SnmpLog.Properties.Resources.sw_ok;
-                        
-                            this.TopMost = true;
-                            this.TopMost = false;
-                            player.Play();
+                            if (switchs.State == true)
+                            {
+                                actpctbx.Image = global::SnmpLog.Properties.Resources.sw_ok;
+                            }
+                            else
+                            {
+                                actpctbx.Image = global::SnmpLog.Properties.Resources.sw_bad;
+                            }
                             switchs.Updated = false;
-
                         }
                     }
                 }
-                await Task.Delay(int.Parse(textBoxUpdTime.Text)*1000);
+                await Task.Delay(1000);
             }
                 
             
@@ -616,8 +660,16 @@ namespace SnmpLog
             string StringPortState;
             string StringSearchEth = "1/0/";
             string StringSearchState = "state to ";
+
             foreach (MySwitchs CurrentSwitch in activeSwitchs)
             {
+                if (fromSnmp.Message == "trap" && CurrentSwitch.IPAddress.ToString() == fromSnmp.snmp_packet.Pdu.AgentAddress.ToString())
+                {
+                    player.Play();
+                    this.TopMost = true;
+                    this.TopMost = false;
+                }
+
                 if (CurrentSwitch.IPAddress.ToString() == fromSnmp.snmp_packet.Pdu.AgentAddress.ToString())
                 {
                     CurrentSwitch.State = true;
