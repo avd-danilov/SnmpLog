@@ -31,3 +31,32 @@
 **** 1.3.6.1.2.1.2.2.1.8.21 Integer32: 1
 ** End of SNMP Version 2 TRAP data.
 Программа "[16560] SnmpLog.exe" завершилась с кодом 4294967295 (0xffffffff).
+
+
+
+
+** SNMP Version 1 TRAP received from 10.22.8.11:161:
+*** Trap generic: 6
+*** Trap specific: 199 1.3.6.1.4.1.27514
+*** Agent address: 10.22.8.11
+*** Timestamp: 100739
+*** VarBind count: 1
+*** VarBind content:
+**** 1.3.6.1.4.1.27514.101.123.1 OctetString: System will be rebooted (warm reboot), reason: reload via CLI by admin
+** End of SNMP Version 1 TRAP data.
+sysDescr(1.3.6.1.2.1.1.1.0) (OctetString): Device: QSW-4610-28T-POE-AC
+ SoftWare Version 8.2.1.165
+ BootRom Version 2011.12.25
+ HardWare Version 1.2
+  Serial No.:5821180420180087
+ Copyright (C) 2021 by QTECH LLC
+ All rights reserved
+
+
+
+ snmp-server enable traps
+ snmp-server host 10.22.8.15 v1 0 public
+
+
+
+  .1.3.6.1.2.1.17.2.15.1.3 запрос stp

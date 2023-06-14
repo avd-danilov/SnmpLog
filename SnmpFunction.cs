@@ -129,10 +129,16 @@ namespace SnmpLog
             pdu.VbList.Add("1.3.6.1.2.1.1.4.0"); //sysContact
             pdu.VbList.Add("1.3.6.1.2.1.1.5.0"); //sysName
                                                  // Make SNMP request
-            for (int i = 1; i <= selectedSwitch.Ports.Count; i++)
+            for (int i = 1; i <= selectedSwitch.Ports.Count; i++)   //Смотрим состояние портов
             {
                 pdu.VbList.Add(".1.3.6.1.2.1.2.2.1.8." + i);
             }
+            if (selectedSwitch.Type == "QSW4610" || selectedSwitch.Type == "QSW8330")
+                for (int i = 1; i <= selectedSwitch.Ports.Count; i++)
+                    {
+                        pdu.VbList.Add(".1.3.6.1.2.1.17.2.15.1.3." + i);        //Смотрим состояние STP
+                    }
+            
             try
             {
                 SnmpV1Packet result = (SnmpV1Packet)target.Request(pdu, param);
@@ -145,7 +151,7 @@ namespace SnmpLog
                     selectedSwitch.Updated = true;
                     // ErrorStatus other then 0 is an error returned by
                     // the Agent - see SnmpConstants for error definitions
-                    if (result.Pdu.ErrorStatus != 0)
+                    if (result.Pdu.ErrorStatus != 0 && result.Pdu.ErrorStatus !=2)
                     {
                         // agent reported an error with the request
 
@@ -157,7 +163,7 @@ namespace SnmpLog
                     {
                         // Reply variables are returned in the same order as they were added
                         //  to the VbList
-                        for (int i = 1; i <= selectedSwitch.Ports.Count; i++)
+                        for (int i = 1; i <= selectedSwitch.Ports.Count; i++)       //Смотрим состояние портов
                         {
                             if (result.Pdu.VbList[i + 4].Value.ToString() == "1")
                             {
@@ -165,7 +171,12 @@ namespace SnmpLog
                             }
                             else
                                 selectedSwitch.Ports[i-1] = false;
+                            //Добавим значение STP 
+                            if (selectedSwitch.Type == "QSW4610" || selectedSwitch.Type == "QSW8330")
+                                selectedSwitch.Stp[i - 1] = int.Parse(result.Pdu.VbList[i + 4 + selectedSwitch.Ports.Count].Value.ToString());
                         }
+
+
                         selectedSwitch.Uptime = result.Pdu.VbList[2].Value.ToString();
                         Console.WriteLine("sysDescr({0}) ({1}): {2}",
                             result.Pdu.VbList[0].Oid.ToString(),

@@ -31,8 +31,8 @@ namespace SnmpLog
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
             this.richTextBox1 = new System.Windows.Forms.RichTextBox();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.menuToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -63,11 +63,12 @@ namespace SnmpLog
             this.labelName = new System.Windows.Forms.Label();
             this.ButtonAddSw = new System.Windows.Forms.Button();
             this.listView1 = new System.Windows.Forms.ListView();
-            this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnPorts = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnState = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnData = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.pictureBoxWire = new System.Windows.Forms.PictureBox();
             this.timer_update = new System.Windows.Forms.Timer(this.components);
+            this.columnSTP = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.menuStrip1.SuspendLayout();
             this.statusStrip.SuspendLayout();
             this.groupBoxConfigure.SuspendLayout();
@@ -91,7 +92,7 @@ namespace SnmpLog
             this.menuToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(1397, 28);
+            this.menuStrip1.Size = new System.Drawing.Size(1397, 30);
             this.menuStrip1.TabIndex = 6;
             this.menuStrip1.Text = "menuProgram";
             // 
@@ -102,7 +103,7 @@ namespace SnmpLog
             this.opnfileconfToolStripMenuItem,
             this.exitToolStripMenuItem});
             this.menuToolStripMenuItem.Name = "menuToolStripMenuItem";
-            this.menuToolStripMenuItem.Size = new System.Drawing.Size(65, 24);
+            this.menuToolStripMenuItem.Size = new System.Drawing.Size(65, 26);
             this.menuToolStripMenuItem.Text = "Меню";
             // 
             // configureToolStripMenuItem
@@ -219,9 +220,9 @@ namespace SnmpLog
             // 
             // SwitchNumPortA
             // 
-            dataGridViewCellStyle3.Format = "0";
-            dataGridViewCellStyle3.NullValue = null;
-            this.SwitchNumPortA.DefaultCellStyle = dataGridViewCellStyle3;
+            dataGridViewCellStyle1.Format = "0";
+            dataGridViewCellStyle1.NullValue = null;
+            this.SwitchNumPortA.DefaultCellStyle = dataGridViewCellStyle1;
             this.SwitchNumPortA.HeaderText = "№ порта";
             this.SwitchNumPortA.MinimumWidth = 6;
             this.SwitchNumPortA.Name = "SwitchNumPortA";
@@ -240,8 +241,8 @@ namespace SnmpLog
             // 
             // SwitchNumPortB
             // 
-            dataGridViewCellStyle4.Format = "0";
-            this.SwitchNumPortB.DefaultCellStyle = dataGridViewCellStyle4;
+            dataGridViewCellStyle2.Format = "0";
+            this.SwitchNumPortB.DefaultCellStyle = dataGridViewCellStyle2;
             this.SwitchNumPortB.HeaderText = "№ порта";
             this.SwitchNumPortB.MinimumWidth = 6;
             this.SwitchNumPortB.Name = "SwitchNumPortB";
@@ -345,9 +346,10 @@ namespace SnmpLog
             // listView1
             // 
             this.listView1.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            this.columnHeader1,
-            this.columnHeader2,
-            this.columnHeader3});
+            this.columnPorts,
+            this.columnState,
+            this.columnSTP,
+            this.columnData});
             this.listView1.FullRowSelect = true;
             this.listView1.GridLines = true;
             this.listView1.HideSelection = false;
@@ -359,21 +361,21 @@ namespace SnmpLog
             this.listView1.UseCompatibleStateImageBehavior = false;
             this.listView1.View = System.Windows.Forms.View.Details;
             // 
-            // columnHeader1
+            // columnPorts
             // 
-            this.columnHeader1.Text = "Порт";
-            this.columnHeader1.Width = 45;
+            this.columnPorts.Text = "Порт";
+            this.columnPorts.Width = 45;
             // 
-            // columnHeader2
+            // columnState
             // 
-            this.columnHeader2.Text = "Состояние";
-            this.columnHeader2.Width = 120;
+            this.columnState.Text = "Состояние";
+            this.columnState.Width = 120;
             // 
-            // columnHeader3
+            // columnData
             // 
-            this.columnHeader3.Text = "Данные";
-            this.columnHeader3.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
-            this.columnHeader3.Width = 197;
+            this.columnData.Text = "Данные";
+            this.columnData.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            this.columnData.Width = 197;
             // 
             // pictureBoxWire
             // 
@@ -384,6 +386,11 @@ namespace SnmpLog
             this.pictureBoxWire.TabIndex = 11;
             this.pictureBoxWire.TabStop = false;
             this.pictureBoxWire.MouseDown += new System.Windows.Forms.MouseEventHandler(this.Form1_MouseDown);
+            // 
+            // columnSTP
+            // 
+            this.columnSTP.Text = "STP статус";
+            this.columnSTP.Width = 120;
             // 
             // Form1
             // 
@@ -438,8 +445,8 @@ namespace SnmpLog
         private ComboBox comboBoxSwitchs;
         private Button ButtonDeleteSw;
         private ListView listView1;
-        private ColumnHeader columnHeader1;
-        private ColumnHeader columnHeader2;
+        private ColumnHeader columnPorts;
+        private ColumnHeader columnState;
         private PictureBox pictureBoxWire;
         private DataGridView ConnectGridView;
         private Button buttonSaveConn;
@@ -451,7 +458,8 @@ namespace SnmpLog
         private Timer timer_update;
         private TextBox textBoxUpdTime;
         private Label label1;
-        private ColumnHeader columnHeader3;
+        private ColumnHeader columnData;
+        private ColumnHeader columnSTP;
     }
 }
 

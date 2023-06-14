@@ -62,10 +62,11 @@ namespace SnmpLog
             public bool State { get; set; }
             public bool Updated { get; set; }
             public List<bool> Ports { get; set; }
+            public List<int> Stp { get; set; }
             public string Uptime { get; set; }
 
 
-            public MySwitchs(string Name, IPAddress IPAddress, string Type, Point Location, bool State, bool Updated, List<bool> Ports, string Uptime)
+            public MySwitchs(string Name, IPAddress IPAddress, string Type, Point Location, bool State, bool Updated, List<bool> Ports, string Uptime, List<int> Stp)
             {
                 this.Name = Name;
                 this.IPAddress = IPAddress;
@@ -75,7 +76,7 @@ namespace SnmpLog
                 this.Updated = Updated;
                 this.Ports = Ports;
                 this.Uptime = Uptime;
-
+                this.Stp = Stp;
             }
         }
 
@@ -108,11 +109,12 @@ namespace SnmpLog
                 EndCap = System.Drawing.Drawing2D.LineCap.Round,
                 DashStyle = DashStyle.Dot,
             };
-            public Pen pen_clear = new Pen(System.Drawing.SystemColors.ControlLight)
+            public Pen pen_warn = new Pen(Color.FromArgb(160, 255, 255, 127))
             {
                 Width = 8,
                 StartCap = System.Drawing.Drawing2D.LineCap.Round,
-                EndCap = System.Drawing.Drawing2D.LineCap.Round
+                EndCap = System.Drawing.Drawing2D.LineCap.Round,
+                DashStyle = DashStyle.Dot,
             };
 
             public void CreateWire(Point sw1, Point sw2, Pen pen, Graphics graphics)
@@ -152,14 +154,24 @@ namespace SnmpLog
 
                 if(SwNumA != 999 && SwNumB != 999)
                 {
-                    if (activeSwitchs[SwNumA].Ports[int.Parse(line.Port_A)-1] && activeSwitchs[SwNumB].Ports[int.Parse(line.Port_A)-1])
+                    if (activeSwitchs[SwNumA].Ports[int.Parse(line.Port_A)-1] &&
+                        activeSwitchs[SwNumB].Ports[int.Parse(line.Port_B)-1] &&
+                        activeSwitchs[SwNumA].Stp[int.Parse(line.Port_A) - 1] == 5 &&
+                        activeSwitchs[SwNumB].Stp[int.Parse(line.Port_B) - 1] == 5)
                     drawWire.CreateWire(activeSwitchs[SwNumA].Location, activeSwitchs[SwNumB].Location, drawWire.pen_ok, activememo);
-                    else
+                    else if(activeSwitchs[SwNumA].Ports[int.Parse(line.Port_A) - 1] &&
+                            activeSwitchs[SwNumB].Ports[int.Parse(line.Port_B) - 1] &&
+                            (activeSwitchs[SwNumA].Stp[int.Parse(line.Port_A) - 1] == 2 ||
+                            activeSwitchs[SwNumB].Stp[int.Parse(line.Port_B) - 1] == 2)
+                            )
                     {
-                        drawWire.CreateWire(activeSwitchs[SwNumA].Location, activeSwitchs[SwNumB].Location, drawWire.pen_bad, activememo);
+                        drawWire.CreateWire(activeSwitchs[SwNumA].Location, activeSwitchs[SwNumB].Location, drawWire.pen_warn, activememo);
                     }
+                    else
+                        drawWire.CreateWire(activeSwitchs[SwNumA].Location, activeSwitchs[SwNumB].Location, drawWire.pen_bad, activememo);
+
                 }
-                
+
             }
         }
 
@@ -273,10 +285,24 @@ namespace SnmpLog
                     pctbx.MouseUp += Pctbx_MouseUp;
                     pctbx.Paint += Pctbx_Paint;
                     List<bool> Ports = new List<bool>();
-                    if (type.Value == "QSW4610") while (Ports.Count < 28) Ports.Add(false);
-                    if (type.Value == "QSW8330") while (Ports.Count < 56) Ports.Add(false);
+                    List<int> Stp = new List<int>();
+                    if (type.Value == "QSW4610") while (Ports.Count < 28) 
+                        {
+                            Ports.Add(false);
+                            Stp.Add(0);
+                        }
+                    if (type.Value == "QSW8330") while (Ports.Count < 56)
+                        {
+                            Ports.Add(false);
+                            Stp.Add(0);
+                        }
+                    if (type.Value == "") while (Ports.Count < 32)
+                        {
+                            Ports.Add(false);
+                            Stp.Add(0);
+                        }
 
-                    activeSwitchs.Add(new MySwitchs(name.Value, Parse(ipadd.Value), type.Value, pctbx.Location, false, false, Ports, "")); ;
+                    activeSwitchs.Add(new MySwitchs(name.Value, Parse(ipadd.Value), type.Value, pctbx.Location, false, false, Ports, "", Stp)); ;
                     i++;
                 }
             }
@@ -353,12 +379,25 @@ namespace SnmpLog
             switches.Add(swElement);
             xdocSwitch.Save("default.xml");
             List<bool> Ports = new List<bool>();
-            if (comboBoxTypeSw.Text == "QSW4610") while (Ports.Count < 28) Ports.Add(false);
-            if (comboBoxTypeSw.Text == "QSW8330") while (Ports.Count < 56) Ports.Add(false);
+            List<int> Stp = new List<int>();
+            if (comboBoxTypeSw.Text == "QSW4610") while (Ports.Count < 28)
+                {
+                    Ports.Add(false);
+                    Stp.Add(0);
+                }
+            if (comboBoxTypeSw.Text == "QSW8330") while (Ports.Count < 56)
+                {
+                    Ports.Add(false);
+                    Stp.Add(0);
+                }
+            if (comboBoxTypeSw.Text == "") while (Ports.Count < 32)
+                {
+                    Ports.Add(false);
+                    Stp.Add(0);
+                }
 
 
-
-            activeSwitchs.Add(new MySwitchs(textBoxNameSw.Text, Parse(textBoxIpSw.Text), comboBoxTypeSw.Text, pctbx.Location, false, false, Ports, "")); ;
+            activeSwitchs.Add(new MySwitchs(textBoxNameSw.Text, Parse(textBoxIpSw.Text), comboBoxTypeSw.Text, pctbx.Location, false, false, Ports, "", Stp)); ;
 
             i++;
         }
@@ -410,12 +449,12 @@ namespace SnmpLog
                         listView1.Items.Clear();
 
                         List<ListViewItem> myItems = new List<ListViewItem>();
-                        List<ListViewItem.ListViewSubItem> listViewSubItems = new List<ListViewItem.ListViewSubItem>();
+                       //List<ListViewItem.ListViewSubItem> listViewSubItems = new List<ListViewItem.ListViewSubItem>();
                         for (int i = 0; i < switchs.Ports.Count; i++)
                         {
+                            myItems.Add(new ListViewItem((i + 1).ToString()));
                             if (switchs.Ports[i])
                             {
-                                myItems.Add(new ListViewItem((i+1).ToString()));
                                 myItems[myItems.Count - 1].SubItems.Add(new ListViewItem.ListViewSubItem());
                                 myItems[myItems.Count - 1].SubItems[1].Text = "Up";
                                 myItems[myItems.Count - 1].BackColor = Color.LightGreen;
@@ -423,17 +462,23 @@ namespace SnmpLog
 
                             else
                             {
-                                myItems.Add(new ListViewItem((i + 1).ToString()));
                                 myItems[myItems.Count - 1].SubItems.Add(new ListViewItem.ListViewSubItem());
                                 myItems[myItems.Count - 1].SubItems[1].Text = "Down";
                             }
+                            myItems[myItems.Count - 1].SubItems.Add(new ListViewItem.ListViewSubItem());
+                            if (switchs.Stp[i] == 1) myItems[myItems.Count - 1].SubItems[2].Text = "Disabled";
+                            if (switchs.Stp[i] == 2) myItems[myItems.Count - 1].SubItems[2].Text = "Blocking";
+                            if (switchs.Stp[i] == 5) myItems[myItems.Count - 1].SubItems[2].Text = "Forwarding";
+
+
                         }
+
                         myItems[0].SubItems.Add(new ListViewItem.ListViewSubItem());
-                        myItems[0].SubItems[2].Text = switchs.Name;
+                        myItems[0].SubItems[3].Text = switchs.Name;
                         myItems[1].SubItems.Add(new ListViewItem.ListViewSubItem());
-                        myItems[1].SubItems[2].Text = switchs.IPAddress.ToString();
+                        myItems[1].SubItems[3].Text = switchs.IPAddress.ToString();
                         myItems[2].SubItems.Add(new ListViewItem.ListViewSubItem());
-                        myItems[2].SubItems[2].Text = switchs.Uptime;
+                        myItems[2].SubItems[3].Text = switchs.Uptime;
                         listView1.Items.AddRange(myItems.ToArray());
                         break;
                     }
