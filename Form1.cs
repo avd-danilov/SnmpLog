@@ -669,13 +669,12 @@ namespace SnmpLog
                     LogStream.Close();
                     LogStream = new StreamWriter(LogName, true, System.Text.Encoding.Default); //заменим на новый суточный файл
                     //...и удалим старый за 30 дней
-                    
-                    System.DateTime now30 = new System.DateTime(System.DateTime.Now.Date.Year, System.DateTime.Now.Date.Month, System.DateTime.Now.Date.Day);
-                    now30 = now30.AddDays(-30);
+                    System.DateTime now30 = new System.DateTime(System.DateTime.Now.Date.Year, System.DateTime.Now.Date.Month, System.DateTime.Now.Date.Day).AddDays(-30); //дата = текущая - 30 дней
                     LogNameBilder.Clear();
                     LogNameBilder.AppendFormat("{0:D2}_{1:D2}_{2}_log.csv", now30.Date.Day, now30.Date.Month, now30.Date.Year);
                     LogName = LogNameBilder.ToString();
                     if (File.Exists(LogName)) File.Delete(LogName);
+                    //
                 }
                 if (configureToolStripMenuItem.CheckState == CheckState.Unchecked) {
 
