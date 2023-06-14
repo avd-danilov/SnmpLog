@@ -176,12 +176,12 @@ namespace SnmpLog
         }
 
 
-        private void exitToolStripMenuItem_Click(object sender, EventArgs e)
+        private void ExitToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Close();
         }
 
-        private void configureToolStripMenuItem_Click(object sender, EventArgs e)
+        private void ConfigureToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (configureToolStripMenuItem.CheckState == CheckState.Checked)
             {
@@ -233,11 +233,13 @@ namespace SnmpLog
                         var portA = ConnUnit.Element("port_a").Value;
                         var switchNameB = ConnUnit.Element("switch_b").Value;
                         var portB = ConnUnit.Element("port_b").Value;
-                        ConnectionsLine line = new ConnectionsLine();
-                        line.Switch_A= switchNameA;
-                        line.Switch_B= switchNameB;
-                        line.Port_A= portA;
-                        line.Port_B= portB;
+                        ConnectionsLine line = new ConnectionsLine
+                        {
+                            Switch_A = switchNameA,
+                            Switch_B = switchNameB,
+                            Port_A = portA,
+                            Port_B = portB
+                        };
                         activeConnections.Add(line);
 
 
@@ -402,7 +404,7 @@ namespace SnmpLog
             i++;
         }
 
-        private void opnfileconfToolStripMenuItem_Click(object sender, EventArgs e)
+        private void OpnfileconfToolStripMenuItem_Click(object sender, EventArgs e)
         {
 
             openFileDialog1.ShowDialog();
@@ -416,12 +418,16 @@ namespace SnmpLog
 
         private void Pctbx_Paint(object sender, PaintEventArgs e)
         {
-            Pen myPen = new Pen(Color.Gray, 1);
-            myPen.DashStyle = System.Drawing.Drawing2D.DashStyle.Dash;
+            Pen myPen = new Pen(Color.Gray, 1)
+            {
+                DashStyle = System.Drawing.Drawing2D.DashStyle.Dash
+            };
             e.Graphics.DrawRectangle(myPen, 0, 0, 109, 69);
             Font font = new Font("Arial", 13, FontStyle.Bold);
-            StringFormat stringFormat = new StringFormat();
-            stringFormat.Alignment = StringAlignment.Center;
+            StringFormat stringFormat = new StringFormat
+            {
+                Alignment = StringAlignment.Center
+            };
             foreach (MySwitchs sw in activeSwitchs)
             {
                 if (sender.GetType().GetProperty("Name").GetValue(sender, null) as string == sw.Name)
@@ -433,7 +439,7 @@ namespace SnmpLog
 
         }
 
-        private async void Pctbx_MouseUp(object sender, MouseEventArgs e)
+        private void Pctbx_MouseUp(object sender, MouseEventArgs e)
         {
             moveobj = false;
             sender.GetType().GetProperty("BackColor").SetValue(sender, System.Drawing.SystemColors.Control);
@@ -518,7 +524,7 @@ namespace SnmpLog
         }
 
 
-        private void buttonDeleteSw_Click(object sender, EventArgs e)
+        private void ButtonDeleteSw_Click(object sender, EventArgs e)
         {
             if (comboBoxSwitchs.Text == "") return;
             PictureBox actpctbx = Controls[(comboBoxSwitchs.Text)] as PictureBox;
@@ -723,7 +729,7 @@ namespace SnmpLog
 
 
 
-        private void buttonSaveConn_Click(object sender, EventArgs e)
+        private void ButtonSaveConn_Click(object sender, EventArgs e)
         {
 
             xdocSwitch = XDocument.Load("default.xml");
@@ -764,7 +770,7 @@ namespace SnmpLog
 
             catch (Exception ex)
             {
-                MessageBox.Show("Ошибка при заполнении полей");
+                MessageBox.Show("Ошибка при заполнении полей", ex.ToString());
                 return;
 
             }

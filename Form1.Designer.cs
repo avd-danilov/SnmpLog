@@ -111,7 +111,7 @@ namespace SnmpLog
             this.configureToolStripMenuItem.Name = "configureToolStripMenuItem";
             this.configureToolStripMenuItem.Size = new System.Drawing.Size(294, 26);
             this.configureToolStripMenuItem.Text = "Режим конфигурации";
-            this.configureToolStripMenuItem.Click += new System.EventHandler(this.configureToolStripMenuItem_Click);
+            this.configureToolStripMenuItem.Click += new System.EventHandler(this.ConfigureToolStripMenuItem_Click);
             // 
             // opnfileconfToolStripMenuItem
             // 
@@ -119,14 +119,14 @@ namespace SnmpLog
             this.opnfileconfToolStripMenuItem.Name = "opnfileconfToolStripMenuItem";
             this.opnfileconfToolStripMenuItem.Size = new System.Drawing.Size(294, 26);
             this.opnfileconfToolStripMenuItem.Text = "Открыть файл конфигурации";
-            this.opnfileconfToolStripMenuItem.Click += new System.EventHandler(this.opnfileconfToolStripMenuItem_Click);
+            this.opnfileconfToolStripMenuItem.Click += new System.EventHandler(this.OpnfileconfToolStripMenuItem_Click);
             // 
             // exitToolStripMenuItem
             // 
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
             this.exitToolStripMenuItem.Size = new System.Drawing.Size(294, 26);
             this.exitToolStripMenuItem.Text = "Выход";
-            this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
+            this.exitToolStripMenuItem.Click += new System.EventHandler(this.ExitToolStripMenuItem_Click);
             // 
             // statusStrip
             // 
@@ -258,7 +258,7 @@ namespace SnmpLog
             this.buttonSaveConn.TabIndex = 16;
             this.buttonSaveConn.Text = "Сохранить соединения";
             this.buttonSaveConn.UseVisualStyleBackColor = true;
-            this.buttonSaveConn.Click += new System.EventHandler(this.buttonSaveConn_Click);
+            this.buttonSaveConn.Click += new System.EventHandler(this.ButtonSaveConn_Click);
             // 
             // ButtonDeleteSw
             // 
@@ -268,7 +268,7 @@ namespace SnmpLog
             this.ButtonDeleteSw.TabIndex = 15;
             this.ButtonDeleteSw.Text = "Удалить устройство";
             this.ButtonDeleteSw.UseVisualStyleBackColor = true;
-            this.ButtonDeleteSw.Click += new System.EventHandler(this.buttonDeleteSw_Click);
+            this.ButtonDeleteSw.Click += new System.EventHandler(this.ButtonDeleteSw_Click);
             // 
             // comboBoxSwitchs
             // 
