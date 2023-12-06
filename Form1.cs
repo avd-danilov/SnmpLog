@@ -781,68 +781,75 @@ namespace SnmpLog
 
         public void Upd_Switch (UpdSwStruct fromSnmp)
         {
-            int t=999;
-            string StringPortNum;
-            string StringPortState;
-            string StringSearchEth = "1/0/";
-            string StringSearchState = "state to ";
 
-            foreach (MySwitchs CurrentSwitch in activeSwitchs)
+            try
             {
-                if (fromSnmp.Message == "trap" && CurrentSwitch.IPAddress.ToString() == fromSnmp.snmp_packet.Pdu.AgentAddress.ToString())
-                {
-                    player.Play();
-                    this.TopMost = true;
-                    this.TopMost = false;
-                }
+                int t = 999;
+                string StringPortNum;
+                string StringPortState;
+                string StringSearchEth = "1/0/";
+                string StringSearchState = "state to ";
 
-                if (CurrentSwitch.IPAddress.ToString() == fromSnmp.snmp_packet.Pdu.AgentAddress.ToString())
+                foreach (MySwitchs CurrentSwitch in activeSwitchs)
                 {
-                    CurrentSwitch.State = true;
-                    CurrentSwitch.Updated = true;
-                    t = activeSwitchs.IndexOf(CurrentSwitch);
+                    if (fromSnmp.Message == "trap" && CurrentSwitch.IPAddress.ToString() == fromSnmp.snmp_packet.Pdu.AgentAddress.ToString())
+                    {
+                        player.Play();
+                        this.TopMost = true;
+                        this.TopMost = false;
+                    }
+
+                    if (CurrentSwitch.IPAddress.ToString() == fromSnmp.snmp_packet.Pdu.AgentAddress.ToString())
+                    {
+                        CurrentSwitch.State = true;
+                        CurrentSwitch.Updated = true;
+                        t = activeSwitchs.IndexOf(CurrentSwitch);
+                    }
+
                 }
+                if (t == 999) return;
+                var builderText = new StringBuilder();
+
+                Console.WriteLine("** SNMP Version 1 TRAP received from {0}:", fromSnmp.snmp_source_ip.ToString());
+                Console.WriteLine("*** Trap generic: {0}", fromSnmp.snmp_packet.Pdu.Generic);
+                Console.WriteLine("*** Trap specific: {0} {1}", fromSnmp.snmp_packet.Pdu.Specific, fromSnmp.snmp_packet.Pdu.Enterprise);
+                Console.WriteLine("*** Agent address: {0}", fromSnmp.snmp_packet.Pdu.AgentAddress.ToString());
+                Console.WriteLine("*** Timestamp: {0}", fromSnmp.snmp_packet.Pdu.TimeStamp.ToString());
+                Console.WriteLine("*** VarBind count: {0}", fromSnmp.snmp_packet.Pdu.VbList.Count);
+                Console.WriteLine("*** VarBind content:");
+
+                foreach (Vb v in fromSnmp.snmp_packet.Pdu.VbList)
+                {
+                    if (v.Oid.ToString() == "1.3.6.1.4.1.27514.101.120.1")          // Находим Сообщение от порта
+                    {
+                        StringPortNum = v.Value.ToString();                            // Найдем в тексте Номер порта
+                        StringPortNum = StringPortNum.Substring(StringPortNum.LastIndexOf(StringSearchEth) + 4, 2);
+                        StringPortNum = StringPortNum.Trim();
+
+                        StringPortState = v.Value.ToString();                           // Найдем в тексте статус порта
+                        StringPortState = StringPortState.Substring(StringPortState.LastIndexOf(StringSearchState) + 9);
+                        if (StringPortState == "discarding!")
+                            activeSwitchs[t].Ports[int.Parse(StringPortNum) - 1] = false;
+                        if (StringPortState == "learning!")
+                            activeSwitchs[t].Ports[int.Parse(StringPortNum) - 1] = false;
+                        if (StringPortState == "forwarding!")
+                            activeSwitchs[t].Ports[int.Parse(StringPortNum) - 1] = true;
+
+                        builderText.Append(System.DateTime.Now + "    " + activeSwitchs[t].Name + fromSnmp.snmp_packet.Pdu.AgentAddress.ToString() + " " + v.Value.ToString() + "\r\n");
+                        richTextBox1.AppendText(builderText.ToString());
+                        builderText.Clear();
+                        builderText.AppendFormat("{0}\t{1}\tПорт №{2:D2}\t{3}\r\n", System.DateTime.Now, activeSwitchs[t].Name, StringPortNum, StringPortState);
+                        LogStream.Write(builderText);
+                        LogStream.Flush();
+
+                    }
+                    Console.WriteLine("**** {0} {1}: {2}", v.Oid.ToString(), SnmpConstants.GetTypeName(v.Value.Type), v.Value.ToString());
+                }
+                Console.WriteLine("** End of SNMP Version 1 TRAP data.");
 
             }
-            if (t == 999) return;
-            var builderText = new StringBuilder();
-
-            Console.WriteLine("** SNMP Version 1 TRAP received from {0}:", fromSnmp.snmp_source_ip.ToString());
-            Console.WriteLine("*** Trap generic: {0}", fromSnmp.snmp_packet.Pdu.Generic);
-            Console.WriteLine("*** Trap specific: {0} {1}", fromSnmp.snmp_packet.Pdu.Specific, fromSnmp.snmp_packet.Pdu.Enterprise);
-            Console.WriteLine("*** Agent address: {0}", fromSnmp.snmp_packet.Pdu.AgentAddress.ToString());
-            Console.WriteLine("*** Timestamp: {0}", fromSnmp.snmp_packet.Pdu.TimeStamp.ToString());
-            Console.WriteLine("*** VarBind count: {0}", fromSnmp.snmp_packet.Pdu.VbList.Count);
-            Console.WriteLine("*** VarBind content:");
-
-            foreach (Vb v in fromSnmp.snmp_packet.Pdu.VbList)
-            {
-                if (v.Oid.ToString() == "1.3.6.1.4.1.27514.101.120.1")          // Находим Сообщение от порта
-                {
-                    StringPortNum = v.Value.ToString();                            // Найдем в тексте Номер порта
-                    StringPortNum = StringPortNum.Substring(StringPortNum.LastIndexOf(StringSearchEth)+4,2);
-                    StringPortNum = StringPortNum.Trim();
-
-                    StringPortState = v.Value.ToString();                           // Найдем в тексте статус порта
-                    StringPortState = StringPortState.Substring(StringPortState.LastIndexOf(StringSearchState)+9);
-                    if (StringPortState == "discarding!")
-                        activeSwitchs[t].Ports[int.Parse(StringPortNum)-1] = false;
-                    if (StringPortState == "learning!")
-                        activeSwitchs[t].Ports[int.Parse(StringPortNum)-1] = false;
-                    if (StringPortState == "forwarding!")
-                        activeSwitchs[t].Ports[int.Parse(StringPortNum)-1] = true;
-
-                    builderText.Append(System.DateTime.Now + "    " + activeSwitchs[t].Name + fromSnmp.snmp_packet.Pdu.AgentAddress.ToString() + " " + v.Value.ToString() + "\r\n");
-                    richTextBox1.AppendText(builderText.ToString());
-                    builderText.Clear();
-                    builderText.AppendFormat("{0}\t{1}\tПорт №{2:D2}\t{3}\r\n", System.DateTime.Now, activeSwitchs[t].Name, StringPortNum, StringPortState);
-                    LogStream.Write(builderText);
-                    LogStream.Flush();
-
-                }
-                Console.WriteLine("**** {0} {1}: {2}", v.Oid.ToString(), SnmpConstants.GetTypeName(v.Value.Type), v.Value.ToString());
-            }
-            Console.WriteLine("** End of SNMP Version 1 TRAP data.");
+            catch(Exception ex) { }
+            
         }
     }
 }
